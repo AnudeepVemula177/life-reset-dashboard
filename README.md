@@ -20,3 +20,10 @@ Open `index.html` in a modern browser. No build step or dependencies are require
 
 ## Data note
 Progress is stored in the current browser using `localStorage`; it does not automatically sync between devices. Clearing browser data can remove saved progress.
+
+
+## New practical upgrades
+- Edit an existing task without deleting and recreating it.
+- Export your Life Reset data to a JSON backup file.
+- Import a previously exported backup on the same or another browser/device. Importing replaces current data after confirmation.
+- Data remains browser-local unless you export and move the backup yourself; there is no account-based cloud sync.
