@@ -13,7 +13,32 @@
 <section class="panel" id="tasks"><div class="heading"><div><small>MAKE TODAY COUNT</small><h2>Today's tasks</h2></div><span class="tag" id="taskTag">3 tasks</span></div><form id="taskForm"><input id="taskInput" maxlength="90" placeholder="Add a small goal..." aria-label="New task"><select id="taskPriority" aria-label="Task priority"><option value="normal">Normal</option><option value="high">High priority</option><option value="low">Low priority</option></select><button class="add" aria-label="Add task">+</button></form><div class="tasktools"><label class="tasksearch"><span aria-hidden="true">⌕</span><input id="taskSearch" type="search" placeholder="Search your tasks..." aria-label="Search tasks"></label><div class="filters" role="group" aria-label="Filter tasks"><button class="filter active" data-filter="all">All <span id="countAll">0</span></button><button class="filter" data-filter="active">Active <span id="countActive">0</span></button><button class="filter" data-filter="done">Done <span id="countDone">0</span></button></div></div><div class="taskquick"><span>💡 Tip: break big goals into small tasks.</span><button type="button" id="sortTasks">↕ Priority first</button></div><div id="taskList"></div><p id="empty" hidden>No tasks yet. Add one small goal to begin.</p><div class="taskfooter"><span id="left">3 tasks left</span><button id="clearDone">Clear completed</button></div></section></div>
 <section class="panel music-panel" id="music" aria-labelledby="musicTitle">
  <div class="heading"><div><small>YOUR SOUNDTRACK</small><h2 id="musicTitle">Motivational music</h2></div><span class="tag">MANUAL PLAY</span></div>
- <p class="sub">Choose a mood and press play when you are ready. Soundscapes are generated in your browser—no external music files or sign-in needed.</p>
+ <p class="sub">Pick your vibe, search YouTube for a track or playlist, then play it here. Nothing starts until you press a button.</p>
+ <div class="yt-music-box">
+  <div class="yt-moods" role="group" aria-label="Choose music mood">
+   <button type="button" class="yt-mood selected" data-yt-mood="phonk" aria-pressed="true"><span>🔥</span><b>Phonk</b><small>Dark bass · drift</small></button>
+   <button type="button" class="yt-mood" data-yt-mood="slowed" aria-pressed="false"><span>🌌</span><b>Slowed + reverb</b><small>Atmospheric · deep</small></button>
+   <button type="button" class="yt-mood" data-yt-mood="motivation" aria-pressed="false"><span>⚡</span><b>Motivation</b><small>Gym · beast mode</small></button>
+   <button type="button" class="yt-mood" data-yt-mood="focus" aria-pressed="false"><span>🎮</span><b>Gaming focus</b><small>Energetic · flow</small></button>
+  </div>
+  <form class="yt-search-form" id="ytSearchForm">
+   <label class="yt-search-field"><span aria-hidden="true">⌕</span><input id="ytSearch" type="search" maxlength="120" placeholder="Search a song or playlist..." aria-label="Search a YouTube song or playlist"></label>
+   <button type="submit" class="primary">Search YouTube ↗</button>
+  </form>
+  <div class="yt-load-form">
+   <label for="ytUrl">Or paste a YouTube video / playlist link</label>
+   <div class="yt-url-row"><input id="ytUrl" type="url" inputmode="url" placeholder="https://youtube.com/watch?v=... or playlist link"><button type="button" class="secondary" id="ytLoad">Load player</button></div>
+  </div>
+  <div class="yt-player-wrap" id="ytPlayerWrap" hidden>
+   <div class="yt-player-heading"><div><small>YOUTUBE PLAYER</small><b id="ytPlayerTitle">Selected track</b></div><button type="button" class="secondary" id="ytClear">Close player</button></div>
+   <div class="yt-player-frame" id="ytPlayerFrame"></div>
+   <p class="music-note">Playback controls are provided by YouTube. Some videos may block embedding; use “Open on YouTube” if needed.</p>
+   <a id="ytOpenLink" class="yt-open-link" href="https://www.youtube.com/" target="_blank" rel="noopener">Open on YouTube ↗</a>
+  </div>
+  <p class="music-note" id="ytStatus" aria-live="polite">Choose a mood or search for the exact song you want. Search opens YouTube in a new tab.</p>
+ </div>
+ <details class="soundscape-details"><summary>Or play built-in ambient soundscapes</summary>
+ <p class="sub">Original browser-generated tones for when you want music without opening YouTube.</p>
  <div class="music-layout">
   <div class="music-art" aria-hidden="true"><div class="music-orbit orbit-one"></div><div class="music-orbit orbit-two"></div><div class="music-disc"><span>♫</span></div><div class="music-equalizer"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
   <div class="music-controls">
@@ -28,6 +53,7 @@
    <p class="music-note" id="musicNote">Tip: start at a low volume while studying. Audio starts only after you press Play.</p>
   </div>
  </div>
+ </details>
 </section>
 <section class="panel habits" id="habits"><div class="heading"><div><small>SMALL PROMISES, KEPT DAILY</small><h2>Daily habits</h2></div><span class="tag">TODAY</span></div><div class="habitsummary"><span id="habitCount">0 of 4 habits complete</span><div class="track"><i id="habitBar"></i></div></div><div class="habitgrid"><label><input type="checkbox" data-habit="water"><span class="check">✓</span><span>💧</span><div><b>Drink water</b><small>Start with one glass</small></div></label><label><input type="checkbox" data-habit="move"><span class="check">✓</span><span>⚡</span><div><b>Move your body</b><small>Stretch or take a walk</small></div></label><label><input type="checkbox" data-habit="learn"><span class="check">✓</span><span>📚</span><div><b>Learn something</b><small>Even 15 minutes counts</small></div></label><label><input type="checkbox" data-habit="plan"><span class="check">✓</span><span>🌙</span><div><b>Plan tomorrow</b><small>Write one next step</small></div></label></div></section>
 <section class="panel personal-panel" id="personalize"><div class="heading"><div><small>MAKE IT YOURS</small><h2>Your daily setup</h2></div><span class="tag">PERSONAL</span></div><p class="sub">Set a name and a focus goal that feels realistic for you. Your choices stay saved in this browser.</p><form id="profileForm" class="profile-form"><label class="profile-field"><span>Your name or nickname</span><input id="profileName" maxlength="32" placeholder="What should we call you?" autocomplete="nickname"></label><label class="profile-field"><span>Daily focus goal</span><select id="focusGoal"><option value="15">15 minutes · gentle start</option><option value="25" selected>25 minutes · steady progress</option><option value="45">45 minutes · deep work</option><option value="60">60 minutes · big focus day</option><option value="90">90 minutes · ambitious day</option></select></label><button class="primary" type="submit">Save my setup</button></form><div class="goal-progress"><div><span>Today's focus goal</span><b id="focusGoalLabel">0 / 25 min</b></div><div class="track"><i id="focusGoalBar"></i></div></div></section>

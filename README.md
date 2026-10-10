@@ -44,3 +44,14 @@ Progress is stored in the current browser using `localStorage`; it does not auto
 
 ## Update on GitHub Pages
 Replace `index.html`, `style.css`, `script.js`, and `README.md` in the repository root with the files in this ZIP, then commit the changes. The existing dashboard features and browser-local data keys are preserved.
+
+## YouTube Phonk Player (new)
+- Mood presets for **Phonk**, **Slowed + reverb**, **Motivation**, and **Gaming focus**. Choosing a mood fills a YouTube search phrase; it does not start playback.
+- Search opens YouTube results in a new tab so you can choose the exact song or playlist you want.
+- Paste a YouTube video or playlist URL to load it in the embedded player. Press Play in YouTube when ready; playback is never automatic.
+- YouTube controls and playback availability are managed by YouTube. Some videos do not allow embedding; the player includes an “Open on YouTube” link as a fallback.
+- The previous original browser-generated ambient soundscapes remain available under **Or play built-in ambient soundscapes**.
+- No YouTube API key is required; no songs are copied or hosted by this project.
+
+## Update from this ZIP
+Replace `index.html`, `style.css`, `script.js`, and `README.md` in your GitHub Pages repository root. Existing dashboard sections and local-storage keys are retained. Export a backup before replacing files as a precaution.

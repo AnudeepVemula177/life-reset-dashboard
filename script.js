@@ -105,3 +105,45 @@ initDailyQuote();
  volume.addEventListener('input',()=>{$('musicVolumeValue').textContent=volume.value+'%';if(master&&ctx)master.gain.setTargetAtTime(Number(volume.value)/100*.28,ctx.currentTime,.04)});
  window.addEventListener('pagehide',()=>{if(ctx){pause();ctx.close().catch(()=>{})}});
 })();
+
+// Mood-based YouTube search and optional in-page video/playlist embedding.
+(()=>{
+ const searchForm=$('ytSearchForm'),searchInput=$('ytSearch'),urlInput=$('ytUrl'),loadButton=$('ytLoad'),wrap=$('ytPlayerWrap'),frame=$('ytPlayerFrame'),title=$('ytPlayerTitle'),openLink=$('ytOpenLink'),status=$('ytStatus');
+ if(!searchForm||!searchInput||!urlInput||!loadButton||!wrap||!frame)return;
+ const moodQueries={
+  phonk:'phonk playlist drift phonk bass',
+  slowed:'slowed reverb playlist phonk',
+  motivation:'motivational phonk gym playlist',
+  focus:'gaming phonk focus playlist'
+ };
+ let activeMood='phonk';
+ function youtubeSearch(query){const q=String(query||'').trim();if(!q){status.textContent='Type a song or playlist name first.';searchInput.focus();return}window.open('https://www.youtube.com/results?search_query='+encodeURIComponent(q),'_blank','noopener,noreferrer');status.textContent='YouTube search opened for: '+q;}
+ document.querySelectorAll('[data-yt-mood]').forEach(button=>button.addEventListener('click',()=>{
+  activeMood=button.dataset.ytMood||'phonk';
+  document.querySelectorAll('[data-yt-mood]').forEach(other=>{const selected=other===button;other.classList.toggle('selected',selected);other.setAttribute('aria-pressed',String(selected))});
+  searchInput.value=moodQueries[activeMood]||moodQueries.phonk;
+  status.textContent='Mood selected. Press “Search YouTube” to choose a track or playlist.';
+ }));
+ searchInput.value=moodQueries[activeMood];
+ searchForm.addEventListener('submit',event=>{event.preventDefault();youtubeSearch(searchInput.value)});
+ function parseYouTubeUrl(raw){
+  let url;try{url=new URL(String(raw||'').trim())}catch{return null}
+  const host=url.hostname.toLowerCase().replace(/^www\./,'').replace(/^m\./,'');
+  if(!['youtube.com','music.youtube.com','youtu.be','youtube-nocookie.com'].includes(host))return null;
+  const videoId=host==='youtu.be'?url.pathname.split('/').filter(Boolean)[0]:(url.searchParams.get('v')||url.pathname.match(/\/(?:embed|shorts|live)\/([^/?]+)/)?.[1]);
+  const listId=url.searchParams.get('list');
+  const validId=id=>typeof id==='string'&&/^[a-zA-Z0-9_-]{10,80}$/.test(id);
+  if(videoId&&validId(videoId))return {src:'https://www.youtube-nocookie.com/embed/'+encodeURIComponent(videoId)+'?autoplay=0&playsinline=1&rel=0',title:'YouTube video',open:url.href};
+  if(listId&&validId(listId))return {src:'https://www.youtube-nocookie.com/embed/videoseries?list='+encodeURIComponent(listId)+'&autoplay=0&playsinline=1&rel=0',title:'YouTube playlist',open:url.href};
+  return null;
+ }
+ function loadYouTube(){
+  const raw=urlInput.value.trim(),parsed=parseYouTubeUrl(raw);
+  if(!parsed){status.textContent='Please paste a valid YouTube video or playlist URL.';urlInput.focus();return}
+  frame.replaceChildren();const iframe=document.createElement('iframe');iframe.src=parsed.src;iframe.title='YouTube music player';iframe.loading='lazy';iframe.allow='encrypted-media; picture-in-picture; web-share';iframe.referrerPolicy='strict-origin-when-cross-origin';iframe.allowFullscreen=true;frame.appendChild(iframe);
+  title.textContent=parsed.title;openLink.href=parsed.open;wrap.hidden=false;status.textContent='Player ready. Press Play inside the YouTube player when you are ready.';
+ }
+ loadButton.addEventListener('click',loadYouTube);
+ urlInput.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();loadYouTube()}});
+ $('ytClear')?.addEventListener('click',()=>{frame.replaceChildren();wrap.hidden=true;status.textContent='Player closed. Choose another mood or song.'});
+})();
