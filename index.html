@@ -1,93 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <!-- Tells the browser which character set to use. -->
-  <meta charset="UTF-8">
-  <!-- Makes the layout fit phones and laptops. -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Life Reset Dashboard</title>
-  <!-- Connect this HTML page to our design file. -->
-  <link rel="stylesheet" href="style.css">
-  <!-- defer waits until HTML is parsed before running JavaScript. -->
-  <script src="script.js" defer></script>
-</head>
-<body>
-  <main class="dashboard">
-    <header class="topbar">
-      <a class="brand" href="#" aria-label="Life Reset home">
-        <span class="brand-mark">LR</span>
-        <span>LIFE RESET<span class="brand-subtitle">PERSONAL COMMAND CENTER</span></span>
-      </a>
-      <div class="status"><span class="status-dot"></span> SYSTEM READY</div>
-    </header>
-
-    <section class="welcome">
-      <p class="eyebrow">YOUR NEXT CHAPTER STARTS HERE</p>
-      <h1>Reset your day.<br><span>Rebuild your future.</span></h1>
-      <p class="welcome-copy">Small steps. Real progress. One day at a time.</p>
-    </section>
-
-    <section class="stats-grid" aria-label="Daily summary">
-      <article class="panel stat-card">
-        <p class="panel-label">TASKS COMPLETED</p>
-        <p class="stat-value"><span id="completed-count">0</span><span class="stat-divider">/</span><span id="total-count">3</span></p>
-        <p class="stat-hint">Keep moving forward</p>
-      </article>
-      <article class="panel stat-card">
-        <p class="panel-label">DAILY PROGRESS</p>
-        <p class="stat-value"><span id="progress-number">0</span><span class="unit">%</span></p>
-        <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
-      </article>
-      <article class="panel stat-card">
-        <p class="panel-label">TODAY'S MINDSET</p>
-        <p class="mindset-value">Consistency<span class="accent-dot">.</span></p>
-        <p class="stat-hint">Progress over perfection</p>
-      </article>
-    </section>
-
-    <section class="main-grid">
-      <article class="panel focus-panel">
-        <div class="section-heading">
-          <div>
-            <p class="panel-label">DEEP WORK MODE</p>
-            <h2>Focus session</h2>
-          </div>
-          <span class="pill">POMODORO</span>
-        </div>
-        <p class="focus-description">One task. One session. Give it your attention.</p>
-        <div class="timer" id="timer" aria-live="polite">25:00</div>
-        <p id="timer-status" class="timer-status">Ready when you are</p>
-        <div class="timer-actions">
-          <button id="start-button" class="button button-primary">Start focus</button>
-          <button id="reset-button" class="button button-quiet">Reset</button>
-        </div>
-        <p class="tiny-note">Tip: put your phone away before you begin.</p>
-      </article>
-
-      <article class="panel tasks-panel">
-        <div class="section-heading">
-          <div>
-            <p class="panel-label">MAKE TODAY COUNT</p>
-            <h2>Today's tasks</h2>
-          </div>
-          <span class="task-count" id="task-count-label">3 tasks</span>
-        </div>
-        <form id="task-form" class="task-form">
-          <label class="visually-hidden" for="task-input">Add a task</label>
-          <input id="task-input" type="text" maxlength="100" placeholder="Add a small goal..." autocomplete="off">
-          <button class="add-button" type="submit" aria-label="Add task">+</button>
-        </form>
-        <ul id="task-list" class="task-list">
-          <!-- JavaScript will draw the task rows here. -->
-        </ul>
-        <p class="tiny-note">Your tasks are saved in this browser on this device.</p>
-      </article>
-    </section>
-
-    <footer class="footer">
-      <span>BUILT ONE STEP AT A TIME</span>
-      <span>VERSION 0.1 <span class="accent-dot">●</span></span>
-    </footer>
-  </main>
-</body>
-</html>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b14"><title>Life Reset — Command Center</title><link rel="stylesheet" href="style.css"></head>
+<body><div class="shell">
+<aside class="sidebar"><a class="brand" href="#home"><span class="logo">LR</span><span><b>LIFE RESET</b><small>PERSONAL COMMAND CENTER</small></span></a><p class="label">WORKSPACE</p><nav><a class="active" href="#home">◈ &nbsp; Overview</a><a href="#focus">◷ &nbsp; Focus room</a><a href="#tasks">☑ &nbsp; My tasks</a><a href="#habits">✳ &nbsp; Daily habits</a></nav><div class="sidebottom"><div class="live"><i></i><span><b>You're in control</b><small>One step at a time.</small></span></div><p>“You don't need a perfect day. You need a start.”</p><button id="resetDay">↻ Reset today's checks</button></div></aside>
+<main id="home"><header><div class="mobilebrand"><span class="logo mini">LR</span><b>LIFE RESET</b></div><div class="date"><small>YOUR PERSONAL COMMAND CENTER</small><b id="today">Today</b></div><div class="actions"><span class="status"><i></i> SYSTEM READY</span><button id="theme" title="Change accent">✦</button></div></header>
+<section class="hero"><div><small class="cyan">YOUR NEXT CHAPTER STARTS HERE</small><h1>Reset your day.<br><em>Rebuild your future.</em></h1><p>Small steps. Real progress. One day at a time.</p><div class="heroactions"><a class="primary" href="#tasks">Plan my day ↗</a><a href="#focus" class="textlink">Start a focus session →</a></div></div><div class="orb"><div class="core">LR<span>+</span></div><i></i></div></section>
+<section class="stats"><article><small>TASKS COMPLETED</small><div class="number"><b id="done">0</b><span id="total">/ 3</span></div><p>Keep moving forward</p></article><article><small>DAILY PROGRESS</small><div class="number"><b id="percent">0</b><span>%</span></div><div class="track"><i id="bar"></i></div></article><article><small>FOCUS TIME TODAY</small><div class="number"><b id="minutes">0</b><span>min</span></div><p>Every minute counts</p></article><article><small>YOUR STREAK</small><div class="number"><b id="streak">0</b><span>days</span></div><p>Consistency, not pressure</p></article></section>
+<div class="columns"><section class="panel" id="focus"><div class="heading"><div><small>DEEP WORK MODE</small><h2>Focus session</h2></div><span class="tag">POMODORO</span></div><p class="sub">One task. One session. Give it your attention.</p><div class="timer" id="timerRing"><div><b id="clock">25:00</b><small id="timerStatus">READY WHEN YOU ARE</small></div></div><div class="presets"><button class="selected" data-min="25">25 min</button><button data-min="15">15 min</button><button data-min="5">5 min</button></div><div class="timerbuttons"><button class="primary" id="start">▶ Start focus</button><button class="secondary" id="resetTimer">Reset</button></div><p class="tip">✦ Tip: put your phone away before you begin.</p></section>
+<section class="panel" id="tasks"><div class="heading"><div><small>MAKE TODAY COUNT</small><h2>Today's tasks</h2></div><span class="tag" id="taskTag">3 tasks</span></div><form id="taskForm"><input id="taskInput" maxlength="90" placeholder="Add a small goal..." aria-label="New task"><button class="add" aria-label="Add task">+</button></form><div id="taskList"></div><p id="empty" hidden>No tasks yet. Add one small goal to begin.</p><div class="taskfooter"><span id="left">3 tasks left</span><button id="clearDone">Clear completed</button></div></section></div>
+<section class="panel habits" id="habits"><div class="heading"><div><small>SMALL PROMISES, KEPT DAILY</small><h2>Daily habits</h2></div><span class="tag">TODAY</span></div><div class="habitgrid"><label><input type="checkbox" data-habit="water"><span class="check">✓</span><span>💧</span><div><b>Drink water</b><small>Start with one glass</small></div></label><label><input type="checkbox" data-habit="move"><span class="check">✓</span><span>⚡</span><div><b>Move your body</b><small>Stretch or take a walk</small></div></label><label><input type="checkbox" data-habit="learn"><span class="check">✓</span><span>📚</span><div><b>Learn something</b><small>Even 15 minutes counts</small></div></label><label><input type="checkbox" data-habit="plan"><span class="check">✓</span><span>🌙</span><div><b>Plan tomorrow</b><small>Write one next step</small></div></label></div></section>
+<footer><span>© LIFE RESET · BUILT ONE STEP AT A TIME</span><span id="saveStatus">Changes save on this browser</span></footer></main></div><div id="toast" role="status"></div><script src="script.js"></script></body></html>
