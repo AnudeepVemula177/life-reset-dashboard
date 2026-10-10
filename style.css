@@ -103,3 +103,18 @@ body.mint .primary{background:linear-gradient(110deg,#17a994,#35cbb5 55%,#6ce4f3
 /* Keep a visible focus indicator even when nested search inputs remove their own outline. */
 .yt-search-field:focus-within,.yt-url-row input:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-color:var(--cyan);box-shadow:0 0 0 3px #6ce4f31a}
 @media(max-width:680px){.mobile-reset{display:inline-flex;align-items:center;justify-content:center}.actions{gap:7px}.status{display:none}#backupData{padding:9px 10px;font-size:11px}}
+
+/* Music upgrade: saved favorites and quick return to the embedded player */
+.yt-favorites-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}
+.yt-favorites-tools .music-note{margin:0}
+.yt-favorites{display:grid;gap:7px;margin-top:9px}
+.yt-favorite-row{display:flex;align-items:center;gap:8px;min-width:0}
+.yt-favorite-play{flex:1;min-width:0;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#10162a;color:var(--text);cursor:pointer}
+.yt-favorite-play:hover{border-color:var(--cyan);background:#67e2ef0c}
+.yt-favorite-remove{width:38px;height:38px;border:1px solid var(--line);border-radius:10px;background:#171326;color:var(--muted);font-size:20px;cursor:pointer}
+.yt-favorite-remove:hover{border-color:#ff7899;color:#ff9bb1}
+.mini-music-jump{position:fixed;z-index:30;right:18px;bottom:18px;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 28px);padding:12px 15px;border:1px solid #8588ff88;border-radius:14px;background:linear-gradient(120deg,#171b37f5,#25183af5);color:var(--text);box-shadow:0 8px 32px #0008,0 0 24px #777cff20;cursor:pointer;backdrop-filter:blur(12px)}
+.mini-music-jump[hidden]{display:none}
+.mini-music-jump span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
+.mini-music-jump b{font-size:10px;color:var(--cyan);white-space:nowrap}
+@media(max-width:760px){.mini-music-jump{right:10px;bottom:12px;left:10px;justify-content:center}.mini-music-jump span{max-width:38vw}.yt-favorites-tools{align-items:flex-start;flex-direction:column;gap:5px}}
