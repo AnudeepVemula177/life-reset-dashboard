@@ -1,23 +1,22 @@
-# Life Reset — Personal Command Center
+# Life Reset — Smart Neon Dashboard
 
-A responsive, neon-inspired productivity dashboard built with vanilla HTML, CSS, and JavaScript.
+A responsive personal productivity dashboard with a neon purple/blue interface and aqua accent option.
 
 ## Features
-- Futuristic purple/blue UI with an aqua accent theme toggle
-- Daily task manager with All / Active / Completed filters
+- Daily tasks with **search**, All/Active/Done filters, priority labels, and priority-first sorting
 - Focus timer with 5, 15, and 25-minute presets
-- Daily habit tracker and progress summary
+- Daily habit tracker and completion progress
 - Weekly progress chart and 7-day habit consistency map
-- Local browser persistence for tasks, habits, focus time, theme, and daily history
-- Responsive desktop and mobile layouts
+- Browser-local saving for tasks, habits, theme, focus time, and recent progress
+- Responsive desktop and mobile layout
 
 ## Run locally
 Open `index.html` in a modern browser. No build step or dependencies are required.
 
 ## Publish with GitHub Pages
-1. Upload `index.html`, `style.css`, and `script.js` to the root of a GitHub repository.
+1. Upload `index.html`, `style.css`, `script.js`, and `README.md` to the repository root.
 2. Open **Settings → Pages**.
-3. Choose **Deploy from a branch**, select `main` and `/(root)`, then save.
+3. Select **Deploy from a branch**, choose `main` and `/(root)`, then save.
 
-## Data and privacy
-Progress is saved in the current browser using `localStorage`. It is not synced between devices or browsers, and clearing browser site data can erase it. Weekly insights build up as you use the dashboard; older days from before this feature was added may show as empty.
+## Data note
+Progress is stored in the current browser using `localStorage`; it does not automatically sync between devices. Clearing browser data can remove saved progress.
