@@ -74,3 +74,34 @@ async function initDailyQuote(){
  finally{clearTimeout(timeout);try{localStorage.setItem(cacheKey,JSON.stringify(quote))}catch{}}
 }
 initDailyQuote();
+
+
+// Motivational Music Mode: original procedural soundscapes via the Web Audio API.
+// Playback is always manual; no third-party audio files or auto-play.
+(()=>{
+ const panel=$('music'),toggle=$('musicToggle'),volume=$('musicVolume');
+ if(!panel||!toggle||!volume)return;
+ const names={lofi:'Lo-fi flow',rain:'Rainy focus',cinematic:'Epic drive',nature:'Calm nature'};
+ let mood='lofi',ctx=null,master=null,playing=false,loopId=null,step=0,nodes=[],noiseSource=null;
+ const scale={lofi:[196,233.08,293.66,349.23,392,349.23,293.66,233.08],rain:[146.83,174.61,220,261.63,220,174.61],cinematic:[110,130.81,164.81,196,220,196,164.81,130.81],nature:[174.61,196,220,261.63,293.66,261.63,220,196]};
+ function keep(node){nodes.push(node);return node}
+ function tone(freq,when,duration,type='sine',gain=.04,detune=0){
+  const osc=ctx.createOscillator(),amp=ctx.createGain();osc.type=type;osc.frequency.setValueAtTime(freq,when);osc.detune.setValueAtTime(detune,when);amp.gain.setValueAtTime(.0001,when);amp.gain.exponentialRampToValueAtTime(Math.max(.0002,gain),when+.08);amp.gain.setTargetAtTime(.0001,when+Math.max(.1,duration-.15),.12);osc.connect(amp);amp.connect(master);osc.start(when);osc.stop(when+duration+.5);keep(osc);keep(amp);
+ }
+ function chord(when,notes,volume=.018,duration=2.7){notes.forEach((n,i)=>{tone(n,when,duration,'sine',volume,i%2?3:-3);tone(n*2,when,duration,'triangle',volume*.23,0)})}
+ function rainBed(){const size=ctx.sampleRate*2;const buffer=ctx.createBuffer(1,size,ctx.sampleRate);const data=buffer.getChannelData(0);for(let i=0;i<size;i++)data[i]=(Math.random()*2-1)*.24;noiseSource=ctx.createBufferSource();noiseSource.buffer=buffer;noiseSource.loop=true;const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=mood==='rain'?1150:650;const gain=ctx.createGain();gain.gain.value=mood==='rain'?.13:.055;noiseSource.connect(filter);filter.connect(gain);gain.connect(master);noiseSource.start();keep(noiseSource);keep(filter);keep(gain)}
+ function beat(){if(!playing||!ctx)return;const now=ctx.currentTime,notes=scale[mood]||scale.lofi;const idx=step%notes.length;
+  if(mood==='lofi'){tone(notes[idx],now,1.1,'triangle',.045);if(step%4===0){tone(notes[idx]*.5,now,1.8,'sine',.07);chord(now+.03,[notes[idx],notes[(idx+2)%notes.length],notes[(idx+4)%notes.length]],.009,2.4)}if(step%2===1)tone(1200,now,.06,'sine',.006)}
+  else if(mood==='rain'){tone(notes[idx],now,1.8,'sine',.025);if(step%4===0)chord(now,[notes[idx],notes[(idx+2)%notes.length]],.006,3.2)}
+  else if(mood==='cinematic'){if(step%2===0){chord(now,[notes[idx],notes[(idx+2)%notes.length],notes[(idx+4)%notes.length]],.022,3.5);tone(notes[idx]*.5,now,3.4,'sine',.055)}else tone(notes[idx]*2,now,.8,'triangle',.012)}
+  else {tone(notes[idx],now,2.1,'sine',.025);if(step%3===0)tone(notes[(idx+3)%notes.length]*2,now,1.6,'sine',.009)}
+  step++;}
+ function cleanup(){if(loopId){clearInterval(loopId);loopId=null}nodes.forEach(n=>{try{if(n.stop)n.stop()}catch{}try{n.disconnect()}catch{}});nodes=[];noiseSource=null}
+ function status(text){$('musicStatus').textContent=text}
+ async function start(){try{const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio){status('This browser does not support Web Audio');return}if(!ctx)ctx=new Audio();if(ctx.state==='suspended')await ctx.resume();cleanup();master=ctx.createGain();master.gain.value=Number(volume.value)/100*.28;master.connect(ctx.destination);playing=true;step=0;if(mood==='rain'||mood==='nature')rainBed();beat();loopId=setInterval(beat,mood==='cinematic'?850:1050);toggle.textContent='Ⅱ Pause soundscape';toggle.setAttribute('aria-pressed','true');panel.classList.add('is-playing');status('Playing · '+names[mood]);$('musicNote').textContent='Soundscape is generated locally in your browser. Change mood anytime; press Pause to stop.'}catch(err){playing=false;status('Audio could not start — try Play again');toast('Could not start audio in this browser')}}
+ function pause(){playing=false;if(loopId){clearInterval(loopId);loopId=null}cleanup();if(master){try{master.gain.setTargetAtTime(.0001,ctx.currentTime,.03)}catch{}try{master.disconnect()}catch{}master=null}toggle.textContent='▶ Play soundscape';toggle.setAttribute('aria-pressed','false');panel.classList.remove('is-playing');status('Paused · '+names[mood])}
+ toggle.addEventListener('click',()=>{if(playing)pause();else start()});
+ document.querySelectorAll('[data-mood]').forEach(button=>button.addEventListener('click',()=>{mood=button.dataset.mood;document.querySelectorAll('[data-mood]').forEach(b=>{const selected=b===button;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected))});$('musicTrackName').textContent=names[mood];status((playing?'Playing':'Ready')+' · '+names[mood]);if(playing)start()}));
+ volume.addEventListener('input',()=>{$('musicVolumeValue').textContent=volume.value+'%';if(master&&ctx)master.gain.setTargetAtTime(Number(volume.value)/100*.28,ctx.currentTime,.04)});
+ window.addEventListener('pagehide',()=>{if(ctx){pause();ctx.close().catch(()=>{})}});
+})();
