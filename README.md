@@ -10,3 +10,9 @@ Favorites use localStorage on the current browser/device; they are not synced be
 
 ## Apply
 Replace `index.html`, `style.css`, and `script.js` in the repository root, commit, then test the live GitHub Pages site. Keep a backup of your existing files first.
+
+
+### Music favorites modal upgrade
+- Saving a YouTube link now opens a custom neon-styled in-page dialog instead of the browser prompt.
+- Supports Save, Cancel, close button, backdrop click, Escape key, and focus return.
+- Existing browser-local favorite storage, Play, and Remove actions are retained.
