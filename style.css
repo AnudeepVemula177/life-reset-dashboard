@@ -134,3 +134,22 @@ body.mint .primary{background:linear-gradient(110deg,#17a994,#35cbb5 55%,#6ce4f3
 .favorite-modal-actions button{min-width:100px}
 .favorite-modal-close{position:absolute;top:13px;right:13px;width:32px;height:32px;border:1px solid var(--line);border-radius:9px;background:#ffffff08;color:var(--muted);font-size:20px;cursor:pointer}
 @media(max-width:480px){.favorite-modal{padding:21px}.favorite-modal-actions{flex-direction:column-reverse}.favorite-modal-actions button{width:100%}}
+
+/* Final UI polish: keep the favorite dialog's form stacked instead of inheriting the task-form row layout. */
+.favorite-modal-backdrop{z-index:120;overflow-y:auto;overscroll-behavior:contain}
+.favorite-modal{width:min(100%,460px);margin:auto;padding:30px;isolation:isolate;animation:favoriteModalIn .2s ease-out}
+.favorite-modal::before{content:"♫";display:grid;place-items:center;width:48px;height:48px;margin:0 0 18px;border:1px solid #7b83ff55;border-radius:15px;background:linear-gradient(145deg,#667bff2c,#a178ff22);color:var(--cyan);font-size:25px;box-shadow:0 0 26px #777aff18}
+.favorite-modal>small{display:block;margin-bottom:7px}
+.favorite-modal h3{font-size:25px;letter-spacing:-.7px;line-height:1.2;margin:0 34px 9px 0}
+.favorite-modal p{font-size:13px;margin:0 0 20px;max-width:36ch}
+.favorite-modal form{display:grid;grid-template-columns:minmax(0,1fr);align-items:stretch;gap:9px;margin:0}
+.favorite-modal form label{margin:0 0 1px}
+.favorite-modal form input{display:block;width:100%;min-height:46px;padding:13px 14px;border-radius:12px;font-size:14px;flex:none}
+.favorite-modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:9px;padding-top:15px;border-top:1px solid var(--line)}
+.favorite-modal-actions button{min-height:43px;min-width:112px}
+.favorite-modal-close{top:16px;right:16px;width:36px;height:36px;display:grid;place-items:center;font-size:23px;transition:background .18s,border-color .18s,color .18s}
+.favorite-modal-close:hover{color:var(--text);border-color:#8e91ff88;background:#8588ff18}
+.favorite-modal-backdrop[hidden]{display:none!important}
+@keyframes favoriteModalIn{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:480px){.favorite-modal{width:100%;padding:24px 20px;border-radius:18px}.favorite-modal h3{font-size:23px}.favorite-modal-actions{flex-direction:row}.favorite-modal-actions button{width:auto;flex:1;min-width:0}}
+@media(prefers-reduced-motion:reduce){.favorite-modal{animation:none}}
