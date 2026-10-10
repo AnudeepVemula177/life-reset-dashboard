@@ -27,3 +27,9 @@ Progress is stored in the current browser using `localStorage`; it does not auto
 - Export your Life Reset data to a JSON backup file.
 - Import a previously exported backup on the same or another browser/device. Importing replaces current data after confirmation.
 - Data remains browser-local unless you export and move the backup yourself; there is no account-based cloud sync.
+
+## Daily quote behavior
+- The dashboard tries to load the daily quote from ZenQuotes and caches the result for the current local date.
+- The ZenQuotes attribution link is shown only when a quote was actually loaded from that service.
+- If the request fails (for example, offline or blocked by browser cross-origin rules), a stable date-based fallback quote is shown without misleading attribution.
+- The online quote request has a 4.5-second timeout so the fallback remains usable if the service does not respond.

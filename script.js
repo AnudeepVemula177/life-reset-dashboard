@@ -49,6 +49,28 @@ const dailyQuotes=[
  {q:"Believe you can and you're halfway there.",a:"Theodore Roosevelt"},
  {q:"Action is the foundational key to all success.",a:"Pablo Picasso"}
 ];
-function showDailyQuote(q,a,source){const el=$("dailyQuote"),author=$("quoteAuthor"),link=$("quoteSource");if(!el||!author)return;el.textContent='“'+q+'”';author.textContent='— '+(a||'Unknown');if(link)link.hidden=!source;}
-async function initDailyQuote(){const cacheKey='lifeResetQuoteV1',cached=(()=>{try{return JSON.parse(localStorage.getItem(cacheKey)||'null')}catch{return null}})();if(cached&&cached.date===todayKey&&cached.q){showDailyQuote(cached.q,cached.a,cached.online);return}const dayIndex=Math.floor(new Date(todayKey+'T12:00:00').getTime()/86400000)%dailyQuotes.length;const fallback=dailyQuotes[(dayIndex+dailyQuotes.length)%dailyQuotes.length];showDailyQuote(fallback.q,fallback.a,true);try{const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),4500);const response=await fetch('https://zenquotes.io/api/today',{signal:controller.signal,cache:'no-store'});clearTimeout(timeout);if(!response.ok)throw new Error('Quote service unavailable');const data=await response.json(),item=Array.isArray(data)?data[0]:data;if(item&&item.q){const quote={date:todayKey,q:String(item.q),a:String(item.a||'Unknown'),online:true};localStorage.setItem(cacheKey,JSON.stringify(quote));showDailyQuote(quote.q,quote.a,true);return}}catch(e){/* Offline, blocked cross-origin request, or service unavailable: use a stable daily fallback. */}try{localStorage.setItem(cacheKey,JSON.stringify({date:todayKey,...fallback,online:true}))}catch{}}
+function showDailyQuote(q,a,isOnline=false){const el=$("dailyQuote"),author=$("quoteAuthor"),link=$("quoteSource");if(!el||!author)return;el.textContent='“'+q+'”';author.textContent='— '+(a||'Unknown');if(link){link.hidden=!isOnline;link.setAttribute('aria-hidden',String(!isOnline));}}
+async function initDailyQuote(){
+ const cacheKey='lifeResetQuoteV2';
+ let cached=null;
+ try{cached=JSON.parse(localStorage.getItem(cacheKey)||'null')}catch{}
+ if(cached&&cached.date===todayKey&&typeof cached.q==='string'&&cached.q){showDailyQuote(cached.q,cached.a, cached.online===true);return}
+ const dayIndex=Math.floor(new Date(todayKey+'T12:00:00').getTime()/86400000)%dailyQuotes.length;
+ const fallback=dailyQuotes[(dayIndex+dailyQuotes.length)%dailyQuotes.length];
+ // Show a deterministic fallback immediately; only show ZenQuotes attribution for a real API quote.
+ showDailyQuote(fallback.q,fallback.a,false);
+ let quote={date:todayKey,...fallback,online:false};
+ const controller=new AbortController();
+ const timeout=setTimeout(()=>controller.abort(),4500);
+ try{
+  const response=await fetch('https://zenquotes.io/api/today',{signal:controller.signal,cache:'no-store'});
+  if(!response.ok)throw new Error('Quote service unavailable');
+  const data=await response.json(),item=Array.isArray(data)?data[0]:data;
+  if(item&&typeof item.q==='string'&&item.q.trim()){
+   quote={date:todayKey,q:item.q.trim(),a:String(item.a||'Unknown'),online:true};
+   showDailyQuote(quote.q,quote.a,true);
+  }
+ }catch(e){/* Offline, blocked cross-origin request, timeout, or service unavailable: keep the daily fallback. */}
+ finally{clearTimeout(timeout);try{localStorage.setItem(cacheKey,JSON.stringify(quote))}catch{}}
+}
 initDailyQuote();
