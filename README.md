@@ -1,17 +1,15 @@
 # Life Reset — Personal Command Center
 
-A responsive personal productivity dashboard built with plain HTML, CSS, and JavaScript.
+A responsive, neon-inspired productivity dashboard built with vanilla HTML, CSS, and JavaScript.
 
 ## Features
-- Neon purple/blue futuristic interface with subtle grid ambience and glass-style panels
-- Aqua accent theme toggle (preference saved in this browser)
-- Task manager with add, complete, delete, and All / Active / Completed filters
-- Pomodoro focus timer with 5, 15, and 25-minute presets
-- Daily habit checklist and progress indicators
-- Daily progress, focus minutes, and streak indicators
-- Responsive mobile and desktop layout
-- Browser-local persistence using `localStorage`
-- Keyboard focus states and reduced-motion support
+- Futuristic purple/blue UI with an aqua accent theme toggle
+- Daily task manager with All / Active / Completed filters
+- Focus timer with 5, 15, and 25-minute presets
+- Daily habit tracker and progress summary
+- Weekly progress chart and 7-day habit consistency map
+- Local browser persistence for tasks, habits, focus time, theme, and daily history
+- Responsive desktop and mobile layouts
 
 ## Run locally
 Open `index.html` in a modern browser. No build step or dependencies are required.
@@ -21,4 +19,5 @@ Open `index.html` in a modern browser. No build step or dependencies are require
 2. Open **Settings → Pages**.
 3. Choose **Deploy from a branch**, select `main` and `/(root)`, then save.
 
-Data is stored in the browser on the device where the dashboard is used; it does not sync between devices.
+## Data and privacy
+Progress is saved in the current browser using `localStorage`. It is not synced between devices or browsers, and clearing browser site data can erase it. Weekly insights build up as you use the dashboard; older days from before this feature was added may show as empty.
