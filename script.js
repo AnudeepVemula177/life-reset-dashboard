@@ -27,6 +27,7 @@ $("taskForm").onsubmit=e=>{e.preventDefault();let input=$("taskInput"),text=inpu
 $("clearDone").onclick=()=>{let n=state.tasks.length;state.tasks=state.tasks.filter(t=>!t.done);update();toast(n===state.tasks.length?"No completed tasks yet":"Completed tasks cleared")};
 document.querySelectorAll("[data-habit]").forEach(c=>c.onchange=()=>{state.habits[c.dataset.habit]=c.checked;update();if(Object.values(state.habits).every(Boolean))toast("All daily habits complete! Great consistency.")});
 $("resetDay").onclick=()=>{if(confirm("Reset task and habit checkmarks? Focus time will stay.")){state.tasks.forEach(t=>t.done=false);Object.keys(state.habits).forEach(k=>state.habits[k]=false);delete history[todayKey];update();toast("Today's checks reset")}};
+const mobileResetButton=$("resetDayMobile");if(mobileResetButton)mobileResetButton.addEventListener("click",()=>$("resetDay").click());
 $("theme").onclick=()=>{document.body.classList.toggle("mint");try{localStorage.setItem("lifeResetMint",document.body.classList.contains("mint")?"1":"0")}catch{}toast("Accent colour changed")};
 try{if(localStorage.getItem("lifeResetMint")==="1")document.body.classList.add("mint")}catch{}
 $("today").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});applyProfile();render();renderInsights();timerUI();
