@@ -75,3 +75,7 @@ body.mint .primary{background:linear-gradient(110deg,#17a994,#35cbb5 55%,#6ce4f3
 
 /* Practical task editing and backup controls */
 .edit-task{border:1px solid var(--line);background:#171c32;color:#bfc7ff;border-radius:8px;padding:6px 9px;font-size:10px;flex-shrink:0}.edit-task:hover{border-color:var(--accent);color:white}#backupData,#importData{border:1px solid var(--line);background:#151a2e;color:#bfc7ff;border-radius:10px;padding:9px 11px;font-size:11px;white-space:nowrap}#backupData:hover,#importData:hover{border-color:var(--accent);color:white}footer #importData{margin-left:auto}footer{align-items:center;flex-wrap:wrap}@media(max-width:680px){#backupData{font-size:0;padding:9px 11px}#backupData:after{content:"⇩";font-size:14px}.edit-task{padding:7px 8px}}
+
+/* Daily quote card */
+.dailyquote{margin:18px 2px 14px;padding:14px 13px;border:1px solid #8a83ff35;border-radius:13px;background:linear-gradient(135deg,#171a31aa,#10202aaa);box-shadow:inset 0 1px #ffffff08}.dailyquote>small{display:block;color:var(--cyan);font-size:9px;letter-spacing:1.3px}.dailyquote p{margin:10px 0 8px;padding:0;color:#dfe3ff;font-size:12px;line-height:1.7;font-style:italic}.dailyquote span{display:block;color:#a8b0d1;font-size:10px}.dailyquote a{display:inline-block;margin-top:9px;color:#8996ff;font-size:9px;text-decoration:none}.dailyquote a:hover{text-decoration:underline}
+@media(max-width:680px){.dailyquote{margin-top:14px}.dailyquote p{font-size:12px}}

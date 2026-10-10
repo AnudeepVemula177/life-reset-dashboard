@@ -37,3 +37,18 @@ $("importData").onclick=()=>$("importFile").click();
 $("importFile").onchange=async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!data||data.app!=="Life Reset"||!data.state||!Array.isArray(data.state.tasks)||!data.state.habits)throw new Error("Invalid backup");if(!confirm("Import this backup and replace the current browser data? Download a backup first if you want to keep the current progress."))return;state={...defaults(),...data.state,date:todayKey,habits:{...defaults().habits,...data.state.habits},tasks:data.state.tasks.map(t=>({id:Number(t.id)||Date.now()+Math.random(),text:String(t.text||"Untitled task").slice(0,90),done:!!t.done,priority:["high","normal","low"].includes(t.priority)?t.priority:"normal"}))};history=data.history&&typeof data.history==="object"?data.history:{};profile={...profile,...(data.profile||{})};try{localStorage.setItem("lifeResetProfile",JSON.stringify(profile));localStorage.setItem("lifeResetMint",data.theme==="aqua"?"1":"0")}catch{}document.body.classList.toggle("mint",data.theme==="aqua");save();applyProfile();render();toast("Backup restored ✓")}catch{alert("This file doesn't look like a valid Life Reset backup.")}finally{e.target.value=""}};
 
 window.addEventListener("beforeunload",save);document.addEventListener("visibilitychange",()=>{if(document.hidden)save()});
+
+// Date-aware quote of the day: cache once per local date, with an offline fallback.
+const dailyQuotes=[
+ {q:"You don't need a perfect day. You need a start.",a:"Life Reset"},
+ {q:"Great things are done by a series of small things brought together.",a:"Vincent van Gogh"},
+ {q:"It always seems impossible until it's done.",a:"Nelson Mandela"},
+ {q:"The secret of getting ahead is getting started.",a:"Mark Twain"},
+ {q:"You are never too old to set another goal or to dream a new dream.",a:"C. S. Lewis"},
+ {q:"Success is the sum of small efforts, repeated day in and day out.",a:"Robert Collier"},
+ {q:"Believe you can and you're halfway there.",a:"Theodore Roosevelt"},
+ {q:"Action is the foundational key to all success.",a:"Pablo Picasso"}
+];
+function showDailyQuote(q,a,source){const el=$("dailyQuote"),author=$("quoteAuthor"),link=$("quoteSource");if(!el||!author)return;el.textContent='“'+q+'”';author.textContent='— '+(a||'Unknown');if(link)link.hidden=!source;}
+async function initDailyQuote(){const cacheKey='lifeResetQuoteV1',cached=(()=>{try{return JSON.parse(localStorage.getItem(cacheKey)||'null')}catch{return null}})();if(cached&&cached.date===todayKey&&cached.q){showDailyQuote(cached.q,cached.a,cached.online);return}const dayIndex=Math.floor(new Date(todayKey+'T12:00:00').getTime()/86400000)%dailyQuotes.length;const fallback=dailyQuotes[(dayIndex+dailyQuotes.length)%dailyQuotes.length];showDailyQuote(fallback.q,fallback.a,true);try{const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),4500);const response=await fetch('https://zenquotes.io/api/today',{signal:controller.signal,cache:'no-store'});clearTimeout(timeout);if(!response.ok)throw new Error('Quote service unavailable');const data=await response.json(),item=Array.isArray(data)?data[0]:data;if(item&&item.q){const quote={date:todayKey,q:String(item.q),a:String(item.a||'Unknown'),online:true};localStorage.setItem(cacheKey,JSON.stringify(quote));showDailyQuote(quote.q,quote.a,true);return}}catch(e){/* Offline, blocked cross-origin request, or service unavailable: use a stable daily fallback. */}try{localStorage.setItem(cacheKey,JSON.stringify({date:todayKey,...fallback,online:true}))}catch{}}
+initDailyQuote();
