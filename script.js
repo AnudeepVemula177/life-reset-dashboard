@@ -1,7 +1,7 @@
 const $=id=>document.getElementById(id),KEY="lifeResetV3",HISTORY="lifeResetHistoryV3";
 function localDate(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
 const todayKey=localDate(),defaults=()=>({date:todayKey,tasks:[{id:1,text:"Study or learn for 25 minutes",done:false},{id:2,text:"Move your body for a little while",done:false},{id:3,text:"Plan tomorrow before sleeping",done:false}],habits:{water:false,move:false,learn:false,plan:false},focusSeconds:0,streak:0});
-function load(){try{let s=JSON.parse(localStorage.getItem(KEY));if(!s)return defaults();if(s.date!==todayKey){let oldHistory=JSON.parse(localStorage.getItem(HISTORY))||{};oldHistory[s.date]={...(oldHistory[s.date]||{}),tasksDone:(s.tasks||[]).filter(t=>t.done).length,tasksTotal:(s.tasks||[]).length,habitsDone:Object.values(s.habits||{}).filter(Boolean).length,focusMinutes:Math.floor((s.focusSeconds||0)/60),completeHabits:Object.values(s.habits||{}).filter(Boolean).length===Object.keys(s.habits||{}).length};localStorage.setItem(HISTORY,JSON.stringify(oldHistory));return defaults()}return {...defaults(),...s,habits:{...defaults().habits,...s.habits}}}catch{return defaults()}}
+function load(){try{let s=JSON.parse(localStorage.getItem(KEY));if(!s)return defaults();if(s.date!==todayKey){let oldHistory=JSON.parse(localStorage.getItem(HISTORY))||{};const oldHabits=s.habits&&typeof s.habits==='object'?s.habits:{},oldHabitsDone=Object.values(oldHabits).filter(Boolean).length;oldHistory[s.date]={...(oldHistory[s.date]||{}),tasksDone:(Array.isArray(s.tasks)?s.tasks:[]).filter(t=>t&&t.done).length,tasksTotal:Array.isArray(s.tasks)?s.tasks.length:0,habitsDone:oldHabitsDone,focusMinutes:Math.floor(Math.max(0,Number(s.focusSeconds)||0)/60),completeHabits:Object.keys(oldHabits).length>=4&&oldHabitsDone>=4};localStorage.setItem(HISTORY,JSON.stringify(oldHistory));return defaults()}return {...defaults(),...s,habits:{...defaults().habits,...s.habits}}}catch{return defaults()}}
 function readHistory(){try{return JSON.parse(localStorage.getItem(HISTORY))||{}}catch{return {}}}
 let state=load(),history=readHistory(),duration=1500,left=1500,interval=null,running=false,filter="all",prioritySort=false,taskQuery="",profile={name:"",focusGoal:25};
 try{profile={...profile,...JSON.parse(localStorage.getItem("lifeResetProfile")||"{}")} }catch{}
@@ -133,7 +133,7 @@ initDailyQuote();
   const videoId=host==='youtu.be'?url.pathname.split('/').filter(Boolean)[0]:(url.searchParams.get('v')||url.pathname.match(/\/(?:embed|shorts|live)\/([^/?]+)/)?.[1]);
   const listId=url.searchParams.get('list');
   const validId=id=>typeof id==='string'&&/^[a-zA-Z0-9_-]{10,80}$/.test(id);
-  if(videoId&&validId(videoId))return {src:'https://www.youtube-nocookie.com/embed/'+encodeURIComponent(videoId)+'?autoplay=0&playsinline=1&rel=0',title:'YouTube video',open:url.href};
+  if(videoId&&validId(videoId)){const playlistSuffix=listId&&validId(listId)?'&list='+encodeURIComponent(listId):'';return {src:'https://www.youtube-nocookie.com/embed/'+encodeURIComponent(videoId)+'?autoplay=0&playsinline=1&rel=0'+playlistSuffix,title:playlistSuffix?'YouTube video + playlist':'YouTube video',open:url.href};}
   if(listId&&validId(listId))return {src:'https://www.youtube-nocookie.com/embed/videoseries?list='+encodeURIComponent(listId)+'&autoplay=0&playsinline=1&rel=0',title:'YouTube playlist',open:url.href};
   return null;
  }
