@@ -298,7 +298,9 @@
   const physiqueProfiles={
     garou:{name:"Garou",chip:"ATHLETIC BUILD",desc:"A lean, athletic reference emphasizing movement quality, relative strength and conditioning.",focus:["Shoulders & back","Core stability","Leg strength","Conditioning"],bias:"athletic"},
     saitama:{name:"Saitama",chip:"BODYWEIGHT BASE",desc:"A simple, repeatable fitness reference centered on basic strength, steady conditioning and consistency.",focus:["Push strength","Leg endurance","Core control","Cardio base"],bias:"bodyweight"},
-    goku:{name:"Goku",chip:"BALANCED POWER",desc:"A muscular, balanced reference emphasizing progressive strength, full-body training and recovery.",focus:["Chest & back","Shoulders & arms","Leg strength","Core & conditioning"],bias:"power"}
+    goku:{name:"Goku",chip:"BALANCED POWER",desc:"A muscular, balanced reference emphasizing progressive strength, full-body training and recovery.",focus:["Chest & back","Shoulders & arms","Leg strength","Core & conditioning"],bias:"power"},
+    toji:{name:"Toji",chip:"ATHLETIC STRENGTH",desc:"An athletic reference emphasizing strength, grip, mobility and conditioning.",focus:["Back & shoulders","Grip strength","Core stability","Conditioning"],bias:"athletic"},
+    vegeta:{name:"Vegeta",chip:"POWER BUILD",desc:"A strength-focused reference emphasizing progressive resistance, balanced muscle development and recovery.",focus:["Shoulders & chest","Back strength","Leg strength","Core stability"],bias:"power"}
   };
   let physiqueData=safeParse(localStorage.getItem(PHYSIQUE_STORE),{character:"garou",experience:"beginner",equipment:"home",days:4,duration:30,history:[]});
   if(!physiqueData.history)physiqueData.history=[];
@@ -327,6 +329,20 @@
         ["Day 3 · Recovery","Easy walk, mobility, relaxed stretching"],
         ["Day 4 · Upper + core","Incline press, pulldown/rows, lateral raises, plank"],
         ["Day 5 · Full body","Squat, row, push movement, carry or dead bug"]
+      ],
+      toji:[
+        ["Day 1 · Upper strength","Push-ups or bench press, rows, shoulder press, plank"],
+        ["Day 2 · Lower + core","Squats, reverse lunges, glute bridges, dead bugs"],
+        ["Day 3 · Conditioning","Brisk intervals, step-ups, controlled mountain climbers"],
+        ["Day 4 · Grip + full body","Rows, carries or towel holds, split squats, side plank"],
+        ["Day 5 · Optional mobility","Easy walk, shoulder and hip mobility"]
+      ],
+      vegeta:[
+        ["Day 1 · Push strength","Push-ups or bench press, shoulder press, triceps extensions"],
+        ["Day 2 · Legs","Squat variation, hip hinge, reverse lunges, calf raises"],
+        ["Day 3 · Recovery","Easy walk, relaxed stretching, mobility"],
+        ["Day 4 · Pull + core","Rows, pulldown, curls, plank"],
+        ["Day 5 · Full body","Squat, row, push movement, dead bug"]
       ]
     };
     let list=profiles[character].slice();

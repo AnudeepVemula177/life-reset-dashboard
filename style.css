@@ -252,3 +252,8 @@ body.mint .primary{background:linear-gradient(110deg,#17a994,#35cbb5 55%,#6ce4f3
 .workout-complete input{accent-color:#63e6bd;width:16px;height:16px;margin:0}
 .workout-day.is-complete .workout-complete{color:#70edc6}
 @media(max-width:520px){.physique-daily-progress{padding:12px}.workout-complete{font-size:9px}.workout-complete input{width:15px;height:15px}}
+
+/* Five-character selection grid */
+.physique-character-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.physique-character-grid .physique-character:first-child{grid-column:span 2}
+@media(min-width:650px){.physique-character-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}.physique-character-grid .physique-character:first-child{grid-column:auto}}
