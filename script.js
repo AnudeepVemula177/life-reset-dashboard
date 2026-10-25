@@ -409,6 +409,7 @@
     ,asta:{name:"Asta",chip:"BODYWEIGHT ATHLETIC",desc:"A bodyweight-focused reference emphasizing repeatable strength, athletic movement, trunk control and conditioning.",focus:["Push strength","Leg endurance","Core stability","Conditioning"],bias:"athletic"}
     ,broly:{name:"Broly",chip:"MUSCULAR STRENGTH",desc:"A muscular reference emphasizing gradual resistance progression, balanced muscle development and adequate recovery.",focus:["Chest & shoulders","Back strength","Leg strength","Core stability"],bias:"power"}
     ,baki:{name:"Baki Hanma",chip:"COMBAT ATHLETIC",desc:"A combat-athletic reference emphasizing total-body strength, mobility, conditioning and controlled bodyweight work.",focus:["Full-body strength","Core & grip","Mobility","Conditioning"],bias:"athletic"}
+    ,gohan:{name:"Gohan",chip:"BALANCED ATHLETIC POWER",desc:"A balanced, athletic reference emphasizing full-body strength, controlled progression, conditioning and recovery.",focus:["Chest & back","Shoulders & arms","Leg strength","Core & conditioning"],bias:"power"}
   };
   let physiqueData=safeParse(localStorage.getItem(PHYSIQUE_STORE),{character:"garou",experience:"beginner",equipment:"home",days:4,duration:30,history:[]});
   if(!physiqueData.history)physiqueData.history=[];
@@ -472,6 +473,13 @@
         ["Day 3 · Mobility + recovery","Easy walk, hip mobility, shoulder mobility"],
         ["Day 4 · Strength + core","Split squats, push-ups, rows, side plank"],
         ["Day 5 · Athletic conditioning","Low-impact intervals, carries if available, dead bugs"]
+      ],
+      gohan:[
+        ["Day 1 · Upper-body strength","Push-ups or bench press, rows, shoulder press, plank"],
+        ["Day 2 · Lower-body strength","Squats, reverse lunges, hip hinge, calf raises"],
+        ["Day 3 · Conditioning + mobility","Brisk walk intervals, step-ups, gentle mobility"],
+        ["Day 4 · Full-body power","Push-up variation, rows, split squats, dead bugs"],
+        ["Day 5 · Optional recovery","Easy walk, relaxed stretching, shoulder and hip mobility"]
       ]
     };
     let list=profiles[character].slice();
@@ -608,5 +616,6 @@ const physiqueReferenceAssets = {
   toji: "toji-reference.jpg",
   vegeta: "vegeta-reference.jpg",
   goku: "goku-reference.jpg",
-  garou: "garou-reference.jpg"
+  garou: "garou-reference.jpg",
+  gohan: "gohan-reference.jpg"
 };
