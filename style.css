@@ -264,3 +264,5 @@ body.mint .primary{background:linear-gradient(110deg,#17a994,#35cbb5 55%,#6ce4f3
 .physique-character-grid .character-copy{min-width:0}
 .physique-character-grid .character-copy small{display:block;line-height:1.35}
 @media(min-width:760px){.physique-character-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+.physique-image-fallback{min-height:240px;display:none;place-items:center;text-align:center;padding:24px;color:#aeb7d4;font-size:14px;background:#070a12;border-radius:20px}

@@ -393,7 +393,29 @@
     const characterImage=$("#physiqueCharacterImage");
     if(characterImage){
       const key=physiqueData.character;
-      characterImage.src=`${key}-reference.jpg`;
+      characterImage.onerror=()=>{
+        if(key==="baki" && !characterImage.dataset.bakiFallbackTried){
+          characterImage.dataset.bakiFallbackTried="1";
+          characterImage.src="baki-hanma-reference.jpg";
+          return;
+        }
+        characterImage.style.display="none";
+        const wrap=characterImage.closest(".physique-hero-image");
+        if(wrap){
+          let msg=wrap.querySelector(".physique-image-fallback");
+          if(!msg){msg=document.createElement("div");msg.className="physique-image-fallback";msg.textContent="Character image missing — upload the reference JPG beside index.html.";wrap.append(msg);}
+          msg.style.display="block";
+        }
+      };
+      characterImage.onload=()=>{
+        characterImage.style.display="block";
+        const wrap=characterImage.closest(".physique-hero-image");
+        const msg=wrap&&wrap.querySelector(".physique-image-fallback");
+        if(msg)msg.style.display="none";
+      };
+      characterImage.dataset.bakiFallbackTried="";
+      characterImage.style.display="block";
+      characterImage.src=(key==="baki"?"baki-reference.jpg":`${key}-reference.jpg`);
       characterImage.alt=`${profile.name} character reference`;
       setText("physiqueImageCaption",`${profile.name.toUpperCase()} · CHARACTER REFERENCE`);
     }
