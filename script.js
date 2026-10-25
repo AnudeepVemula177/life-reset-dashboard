@@ -470,3 +470,13 @@
 
   snapshotDay();renderAll();save();
 })();
+/* Character reference asset mapping */
+const physiqueReferenceAssets = {
+  asta: "asta-reference.jpg",
+  broly: "broly-reference.jpg",
+  baki: "baki-hanma-reference.jpg",
+  toji: "toji-reference.jpg",
+  vegeta: "vegeta-reference.jpg",
+  goku: "goku-reference.jpg",
+  garou: "garou-reference.jpg"
+};
