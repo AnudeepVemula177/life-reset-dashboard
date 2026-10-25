@@ -281,3 +281,20 @@ body.mint .primary{background:linear-gradient(110deg,#17a994,#35cbb5 55%,#6ce4f3
 @keyframes rpgLevelBadge{0%,100%{transform:scale(1)}50%{transform:scale(1.12);filter:brightness(1.5)}}
 @media(max-width:620px){.quest-list{grid-template-columns:1fr}.quest-footer{flex-direction:column;gap:5px}.quest-heading h2{font-size:21px}.quest-card{padding:13px}}
 @media(prefers-reduced-motion:reduce){.rpg-level-up,.rpg-level-up .rpg-level{animation:none!important}.quest-track i,.rpg-track i{transition:none!important}}
+
+
+/* RPG completion upgrade: achievement unlocks + Anime Physique training ranks */
+.rpg-badge.just-unlocked{animation:achievementPop .75s cubic-bezier(.2,.85,.3,1.25);border-color:rgba(125,231,240,.8);box-shadow:0 0 0 1px rgba(125,231,240,.14),0 0 28px rgba(104,126,255,.2)}
+.rpg-badge.just-unlocked>span{animation:achievementIcon .8s ease}
+@keyframes achievementPop{0%{transform:scale(.88);opacity:.55}65%{transform:scale(1.045)}100%{transform:scale(1);opacity:1}}
+@keyframes achievementIcon{0%,100%{transform:rotate(0) scale(1)}35%{transform:rotate(-12deg) scale(1.35)}70%{transform:rotate(10deg) scale(1.1)}}
+.training-rank-card{margin-top:15px;padding:15px 16px;border:1px solid rgba(124,214,241,.2);border-radius:16px;background:linear-gradient(120deg,rgba(83,113,255,.09),rgba(75,218,214,.045))}
+.training-rank-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.training-rank-heading>div{display:flex;flex-direction:column;gap:5px}
+.training-rank-heading small{font-size:9px;letter-spacing:.15em;font-weight:900;color:#7edce9}
+.training-rank-heading b{font-size:15px;letter-spacing:.07em;color:#e7eaff}
+.training-rank-heading>span{font-size:10px;color:#aab6d3}
+.training-rank-track{height:7px;margin-top:12px;background:#080b16;border:1px solid rgba(148,151,199,.16);border-radius:99px;overflow:hidden}
+.training-rank-track i{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#67d9e9,#7b7cff,#c17bff);box-shadow:0 0 14px rgba(117,139,255,.3);transition:width .5s ease}
+.training-rank-card p{margin:9px 0 0;font-size:11px;line-height:1.5;color:#98a7c7}
+@media(prefers-reduced-motion:reduce){.rpg-badge.just-unlocked,.rpg-badge.just-unlocked>span{animation:none!important}.training-rank-track i{transition:none!important}}

@@ -121,10 +121,15 @@
       {id:"streak-seven",icon:"🔥",name:"Consistency",desc:"Reach a 7-day activity streak",ok:calculateStreak()>=7},
       {id:"level-five",icon:"👑",name:"Level Up",desc:"Reach Level 5",ok:level>=5}
     ];
-    badges.forEach(b=>{if(b.ok&&!rpgData.unlocked.includes(b.id)){rpgData.unlocked.push(b.id);saveRPG();}});
+    const newlyUnlocked=[];
+    badges.forEach(b=>{if(b.ok&&!rpgData.unlocked.includes(b.id)){rpgData.unlocked.push(b.id);newlyUnlocked.push(b);saveRPG();}});
     set("rpgAchievementCount",`${badges.filter(b=>rpgData.unlocked.includes(b.id)).length} / ${badges.length}`);
     const box=$("#rpgBadges");
-    if(box){box.innerHTML="";badges.forEach(b=>{const el=document.createElement("div");el.className="rpg-badge"+(rpgData.unlocked.includes(b.id)?" unlocked":" locked");el.title=b.desc;el.innerHTML=`<span>${b.icon}</span><b>${b.name}</b><small>${rpgData.unlocked.includes(b.id)?"UNLOCKED":b.desc}</small>`;box.append(el);});}
+    if(box){box.innerHTML="";badges.forEach(b=>{const unlocked=rpgData.unlocked.includes(b.id);const el=document.createElement("div");el.className="rpg-badge"+(unlocked?" unlocked":" locked")+(newlyUnlocked.some(n=>n.id===b.id)?" just-unlocked":"");el.title=b.desc;el.innerHTML=`<span>${b.icon}</span><b>${b.name}</b><small>${unlocked?"UNLOCKED":b.desc}</small>`;box.append(el);});}
+    if(newlyUnlocked.length){
+      const names=newlyUnlocked.map(b=>b.name).join(", ");
+      window.setTimeout(()=>toast(`🏆 Achievement unlocked: ${names}!`), rpgLevel()>1?180:0);
+    }
     set("rpgMessage",into>=75?"Almost there — one more useful action!":into>=40?"Nice momentum. Keep stacking small wins.":"Your next level starts with one small win.");
     renderDailyQuests();
   }
@@ -583,6 +588,23 @@
     setText("physiqueWorkoutCount",history.length);setText("physiqueWeekCount",history.filter(x=>new Date(x.date).getTime()>=weekAgo).length);
     setText("physiqueProgressTag",`${history.length} WORKOUT${history.length===1?"":"S"}`);
     setText("physiqueConsistency",history.length?`${Math.min(100,Math.round(history.length/12*100))}% to 12-session milestone`:"Start today");
+    const rankTiers=[
+      {name:"ROOKIE",min:0,next:3,message:"Start with manageable sessions and build the habit."},
+      {name:"INITIATE",min:3,next:6,message:"You are building consistency. Keep your form controlled."},
+      {name:"WARRIOR",min:6,next:12,message:"Strong momentum. Progress gradually and protect recovery."},
+      {name:"ELITE",min:12,next:20,message:"A solid training habit is taking shape. Stay consistent."},
+      {name:"LEGEND",min:20,next:30,message:"Long-term consistency unlocked. Keep training sustainably."},
+      {name:"SAGA MASTER",min:30,next:30,message:"30+ sessions logged. Your consistency is the real achievement."}
+    ];
+    const sessionCount=history.length;
+    const rank=rankTiers.slice().reverse().find(t=>sessionCount>=t.min)||rankTiers[0];
+    const nextRank=rankTiers.find(t=>t.min>rank.min);
+    const rankStart=rank.min, rankEnd=nextRank?nextRank.min:rank.min;
+    const rankProgress=nextRank?Math.max(0,Math.min(100,Math.round((sessionCount-rankStart)/(rankEnd-rankStart)*100))):100;
+    setText("trainingRankName",rank.name);
+    setText("trainingRankSessions",`${sessionCount} session${sessionCount===1?"":"s"} logged`);
+    const rankBar=$("#trainingRankBar");if(rankBar)rankBar.style.width=`${rankProgress}%`;
+    setText("trainingRankMessage",nextRank?`${rank.message} ${nextRank.min-sessionCount} more session${nextRank.min-sessionCount===1?"":"s"} to ${nextRank.name}.`:rank.message);
     const box=$("#physiqueHistory");box.innerHTML="";
     history.slice(0,6).forEach(item=>{const row=document.createElement("div");row.className="physique-history-row";const left=document.createElement("b");left.textContent=item.type;const right=document.createElement("span");right.textContent=`${dateLabel(new Date(item.date))} · ${item.effort}`;row.append(left,right);box.append(row);});
     if(!history.length){const p=document.createElement("p");p.className="physique-diet-note";p.textContent="Your first logged session will appear here. Start with a comfortable level and build gradually.";box.append(p);}
