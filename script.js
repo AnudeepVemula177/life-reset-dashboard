@@ -302,6 +302,7 @@
   };
   let physiqueData=safeParse(localStorage.getItem(PHYSIQUE_STORE),{character:"garou",experience:"beginner",equipment:"home",days:4,duration:30,history:[]});
   if(!physiqueData.history)physiqueData.history=[];
+  if(!physiqueData.completed)physiqueData.completed={};
   function savePhysique(){localStorage.setItem(PHYSIQUE_STORE,JSON.stringify(physiqueData));}
   function setText(id,text){const el=$("#"+id);if(el)el.textContent=text;}
   function workoutTemplate(character,equipment,experience,duration){
@@ -359,12 +360,42 @@
     const focus=$("#physiqueFocusList");focus.innerHTML="";profile.focus.forEach(t=>{const s=document.createElement("span");s.textContent=t;focus.append(s);});
     setText("physiqueScheduleTag",`${physiqueData.days} DAYS`);
     const workout=$("#physiqueWorkout");workout.innerHTML="";
-    workoutTemplate(physiqueData.character,physiqueData.equipment,physiqueData.experience,String(physiqueData.duration)).forEach(day=>{
-      const el=document.createElement("div");el.className="workout-day";
-      const top=document.createElement("div");top.className="workout-day-top";const b=document.createElement("b");b.textContent=day.title;const small=document.createElement("small");small.textContent="PLAN";top.append(b,small);
+    const todayKey=new Date().toISOString().slice(0,10);
+    const planDays=workoutTemplate(physiqueData.character,physiqueData.equipment,physiqueData.experience,String(physiqueData.duration));
+    let completedToday=0;
+    planDays.forEach(day=>{
+      const key=`${todayKey}|${physiqueData.character}|${day.title}`;
+      const done=Boolean(physiqueData.completed[key]);
+      if(done)completedToday++;
+      const el=document.createElement("div");el.className=`workout-day${done?" is-complete":""}`;
+      const top=document.createElement("div");top.className="workout-day-top";
+      const b=document.createElement("b");b.textContent=day.title;
+      const checkLabel=document.createElement("label");checkLabel.className="workout-complete";
+      const check=document.createElement("input");check.type="checkbox";check.checked=done;check.setAttribute("aria-label",`Mark ${day.title} complete`);
+      const checkText=document.createElement("span");checkText.textContent=done?"Completed":"Complete";
+      check.addEventListener("change",()=>{
+        if(check.checked){
+          physiqueData.completed[key]=true;
+          physiqueData.history.unshift({id:makeId(),date:new Date().toISOString(),character:physiqueData.character,type:day.title,effort:"Completed"});
+          physiqueData.history=physiqueData.history.slice(0,100);
+          toast("Workout day completed. Nice work!");
+        }else{
+          delete physiqueData.completed[key];
+          const match=physiqueData.history.findIndex(item=>item.type===day.title&&item.effort==="Completed"&&item.date.slice(0,10)===todayKey&&item.character===physiqueData.character);
+          if(match>=0)physiqueData.history.splice(match,1);
+          toast("Workout marked incomplete.");
+        }
+        savePhysique();renderPhysique();
+      });
+      checkLabel.append(check,checkText);
+      const small=document.createElement("small");small.textContent=done?"DONE":"PLAN";
+      top.append(b,checkLabel,small);
       const p=document.createElement("p");p.textContent=`${day.exercises}. ${day.meta}. Warm up for 5 minutes and stop with a few good reps left.`;
       el.append(top,p);workout.append(el);
     });
+    setText("physiqueDailyProgressText",`${completedToday} of ${planDays.length} completed today`);
+    const progressBar=$("#physiqueDailyProgress");
+    if(progressBar)progressBar.style.width=`${planDays.length?Math.round(completedToday/planDays.length*100):0}%`;
     const meals=[
       ["🌅","Breakfast","Idli or dosa with sambar; or oats/poha plus curd, milk or eggs if you eat them."],
       ["🍱","Lunch","Rice or roti, dal/rajma/chole, vegetables and curd or another protein source."],

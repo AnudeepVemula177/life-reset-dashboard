@@ -238,3 +238,17 @@ body.mint .primary{background:linear-gradient(110deg,#17a994,#35cbb5 55%,#6ce4f3
   .physique-hero-image{height:300px;border-radius:16px}
   .physique-settings{padding:14px!important}
 }
+
+/* Workout completion and daily progress */
+.physique-daily-progress{padding:14px 15px;margin:14px 0 12px;border:1px solid #303957;border-radius:14px;background:#0c1222}
+.physique-daily-progress>div:first-child{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#aab3d2;font-size:12px}
+.physique-daily-progress b{color:#f4f5ff;font-size:12px}
+.physique-progress-track{height:7px;margin-top:11px;border-radius:99px;overflow:hidden;background:#252d47}
+.physique-progress-track i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#6f86ff,#a06cff);transition:width .25s ease}
+.workout-day{position:relative;transition:border-color .2s,background .2s}
+.workout-day.is-complete{border-color:#4dd9b177!important;background:linear-gradient(145deg,#102b2a,#101729)!important}
+.workout-day-top{gap:10px}
+.workout-complete{display:inline-flex;align-items:center;gap:7px;flex-shrink:0;font-size:10px;color:#aeb7d4;cursor:pointer}
+.workout-complete input{accent-color:#63e6bd;width:16px;height:16px;margin:0}
+.workout-day.is-complete .workout-complete{color:#70edc6}
+@media(max-width:520px){.physique-daily-progress{padding:12px}.workout-complete{font-size:9px}.workout-complete input{width:15px;height:15px}}
