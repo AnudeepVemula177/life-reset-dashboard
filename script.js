@@ -301,6 +301,9 @@
     goku:{name:"Goku",chip:"BALANCED POWER",desc:"A muscular, balanced reference emphasizing progressive strength, full-body training and recovery.",focus:["Chest & back","Shoulders & arms","Leg strength","Core & conditioning"],bias:"power"},
     toji:{name:"Toji",chip:"ATHLETIC STRENGTH",desc:"An athletic reference emphasizing strength, grip, mobility and conditioning.",focus:["Back & shoulders","Grip strength","Core stability","Conditioning"],bias:"athletic"},
     vegeta:{name:"Vegeta",chip:"POWER BUILD",desc:"A strength-focused reference emphasizing progressive resistance, balanced muscle development and recovery.",focus:["Shoulders & chest","Back strength","Leg strength","Core stability"],bias:"power"}
+    ,asta:{name:"Asta",chip:"BODYWEIGHT ATHLETIC",desc:"A bodyweight-focused reference emphasizing repeatable strength, athletic movement, trunk control and conditioning.",focus:["Push strength","Leg endurance","Core stability","Conditioning"],bias:"athletic"}
+    ,broly:{name:"Broly",chip:"MUSCULAR STRENGTH",desc:"A muscular reference emphasizing gradual resistance progression, balanced muscle development and adequate recovery.",focus:["Chest & shoulders","Back strength","Leg strength","Core stability"],bias:"power"}
+    ,baki:{name:"Baki Hanma",chip:"COMBAT ATHLETIC",desc:"A combat-athletic reference emphasizing total-body strength, mobility, conditioning and controlled bodyweight work.",focus:["Full-body strength","Core & grip","Mobility","Conditioning"],bias:"athletic"}
   };
   let physiqueData=safeParse(localStorage.getItem(PHYSIQUE_STORE),{character:"garou",experience:"beginner",equipment:"home",days:4,duration:30,history:[]});
   if(!physiqueData.history)physiqueData.history=[];
@@ -343,6 +346,27 @@
         ["Day 3 · Recovery","Easy walk, relaxed stretching, mobility"],
         ["Day 4 · Pull + core","Rows, pulldown, curls, plank"],
         ["Day 5 · Full body","Squat, row, push movement, dead bug"]
+      ],
+      asta:[
+        ["Day 1 · Push + core","Push-ups, incline push-ups, dead bugs, plank"],
+        ["Day 2 · Legs","Squats, reverse lunges, glute bridges, calf raises"],
+        ["Day 3 · Conditioning","Brisk walk intervals, step-ups, gentle mountain climbers"],
+        ["Day 4 · Full body","Push-ups, squats, rows if available, side plank"],
+        ["Day 5 · Optional mobility","Easy walk, shoulder and hip mobility"]
+      ],
+      broly:[
+        ["Day 1 · Upper strength","Push-ups or bench press, rows, shoulder press"],
+        ["Day 2 · Lower strength","Squats, hip hinge, reverse lunges, calf raises"],
+        ["Day 3 · Recovery","Easy walk, relaxed stretching, mobility"],
+        ["Day 4 · Upper + arms","Incline push-ups/press, rows, curls, triceps work"],
+        ["Day 5 · Full body","Squat, row, push movement, dead bug"]
+      ],
+      baki:[
+        ["Day 1 · Full-body strength","Push-ups, squats, rows if available, plank"],
+        ["Day 2 · Conditioning","Brisk intervals, step-ups, controlled mountain climbers"],
+        ["Day 3 · Mobility + recovery","Easy walk, hip mobility, shoulder mobility"],
+        ["Day 4 · Strength + core","Split squats, push-ups, rows, side plank"],
+        ["Day 5 · Athletic conditioning","Low-impact intervals, carries if available, dead bugs"]
       ]
     };
     let list=profiles[character].slice();
