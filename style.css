@@ -186,3 +186,55 @@ body.mint .primary{background:linear-gradient(110deg,#17a994,#35cbb5 55%,#6ce4f3
 .physique-history{display:grid;gap:7px;margin-top:13px}.physique-history-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:10px}.physique-history-row span{color:var(--muted)}.physique-disclaimer{font-size:10px;line-height:1.7;color:#8f98b7;margin:15px 0 0}
 @media(max-width:900px){.physique-overview,.physique-plan-grid{grid-template-columns:1fr}.physique-character-grid{grid-template-columns:1fr}.physique-character{padding:11px}.physique-progress-form{grid-template-columns:1fr 1fr}.physique-progress-form .primary{grid-column:1/-1}}
 @media(max-width:520px){.physique-panel{padding:15px}.physique-blueprint,.physique-settings,.physique-subpanel,.physique-progress{padding:15px}.physique-progress-form{grid-template-columns:1fr}.physique-progress-form .primary{grid-column:auto;width:100%}.physique-progress-stats{gap:6px}.physique-progress-stats>div{padding:10px}.physique-progress-stats small{font-size:7px}.physique-progress-stats b{font-size:17px}.blueprint-foot{flex-direction:column}.physique-character-grid{gap:7px}}
+
+
+/* Anime Physique UI polish — responsive character gallery */
+.physique-character-grid{
+  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px!important;
+  margin:20px 0 18px!important
+}
+.physique-character{
+  display:flex!important;flex-direction:column;align-items:flex-start;gap:7px;
+  min-width:0;padding:14px 12px!important;border:1px solid #303957!important;
+  border-radius:16px!important;background:linear-gradient(145deg,#171d33,#0d1222)!important;
+  color:#eef1ff!important;text-align:left;transition:transform .2s,border-color .2s,box-shadow .2s;
+}
+.physique-character:hover{transform:translateY(-2px);border-color:#7c82ff!important}
+.physique-character.selected{
+  border-color:#8b7bff!important;background:linear-gradient(145deg,#29254d,#151a30)!important;
+  box-shadow:0 0 0 1px #8b7bff44,0 10px 28px #5c4bff22
+}
+.physique-character .character-mark{font-size:22px;line-height:1.2}
+.physique-character .character-copy b{display:block;font-size:15px;letter-spacing:.2px}
+.physique-character .character-copy small{display:block;font-size:10px;line-height:1.5;color:#a8b0d0;margin-top:4px}
+.physique-character .character-arrow{align-self:flex-end;opacity:.7}
+.physique-overview{display:block!important}
+.physique-blueprint{min-width:0}
+.physique-hero-image{
+  position:relative;overflow:hidden;width:100%;height:clamp(250px,58vw,430px);
+  margin:16px 0 20px;border-radius:20px;border:1px solid #343d61;
+  background:#070a13;isolation:isolate
+}
+.physique-hero-image:after{
+  content:"";position:absolute;inset:35% 0 0;
+  background:linear-gradient(transparent,rgba(8,11,23,.82));pointer-events:none
+}
+.physique-hero-image img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 24%}
+.physique-image-caption{
+  position:absolute;z-index:1;left:14px;bottom:13px;font-size:10px;font-weight:800;
+  letter-spacing:1.5px;color:#f5f6ff;text-shadow:0 2px 12px #000
+}
+.physique-settings{margin-top:22px!important;padding:18px!important;border:1px solid #2b3452!important;
+  border-radius:18px!important;background:linear-gradient(145deg,#141a2d,#0d1221)!important}
+.physique-settings-heading{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.physique-settings .physique-field{display:flex;flex-direction:column;gap:7px;min-width:0;margin:0 0 13px}
+.physique-settings select{width:100%;max-width:100%;min-height:44px;padding:10px 12px;border-radius:11px;
+  border:1px solid #3a4567;background:#10162a;color:#f1f3ff;font:inherit}
+@media(max-width:520px){
+  .physique-character-grid{gap:7px!important}
+  .physique-character{padding:12px 9px!important;border-radius:13px!important}
+  .physique-character .character-copy b{font-size:13px}
+  .physique-character .character-copy small{font-size:9px}
+  .physique-hero-image{height:300px;border-radius:16px}
+  .physique-settings{padding:14px!important}
+}

@@ -349,6 +349,13 @@
     const profile=physiqueProfiles[physiqueData.character]||physiqueProfiles.garou;
     $$(".physique-character").forEach(b=>{const on=b.dataset.character===physiqueData.character;b.classList.toggle("selected",on);b.setAttribute("aria-pressed",String(on));});
     setText("physiqueLevelChip",profile.chip);setText("physiqueCharacterName",profile.name);setText("physiqueDescription",profile.desc);
+    const characterImage=$("#physiqueCharacterImage");
+    if(characterImage){
+      const key=physiqueData.character;
+      characterImage.src=`${key}-reference.jpg`;
+      characterImage.alt=`${profile.name} character reference`;
+      setText("physiqueImageCaption",`${profile.name.toUpperCase()} · CHARACTER REFERENCE`);
+    }
     const focus=$("#physiqueFocusList");focus.innerHTML="";profile.focus.forEach(t=>{const s=document.createElement("span");s.textContent=t;focus.append(s);});
     setText("physiqueScheduleTag",`${physiqueData.days} DAYS`);
     const workout=$("#physiqueWorkout");workout.innerHTML="";

@@ -67,21 +67,22 @@
   <p class="sub">Choose a character-inspired training direction. The character blueprint stays fixed; the workout adapts to your experience, equipment and schedule.</p>
   <div class="physique-notice">⚠️ Anime physiques are stylized references, not guaranteed outcomes. This plan focuses on safe, real-world strength, fitness and consistency.</div>
   <div class="physique-character-grid" id="physiqueCharacters">
+    <button type="button" class="physique-character selected" data-character="goku" aria-pressed="true">
+      <span class="character-mark">悟</span><span class="character-copy"><b>Goku</b><small>Muscular · balanced power</small></span><span class="character-arrow">↗</span>
+    </button>
     <button type="button" class="physique-character selected" data-character="garou" aria-pressed="true">
       <span class="character-mark">狼</span><span class="character-copy"><b>Garou</b><small>Athletic · lean strength</small></span><span class="character-arrow">↗</span>
     </button>
     <button type="button" class="physique-character" data-character="saitama" aria-pressed="false">
       <span class="character-mark">一</span><span class="character-copy"><b>Saitama</b><small>Simple · bodyweight base</small></span><span class="character-arrow">↗</span>
     </button>
-    <button type="button" class="physique-character" data-character="goku" aria-pressed="false">
-      <span class="character-mark">悟</span><span class="character-copy"><b>Goku</b><small>Muscular · balanced power</small></span><span class="character-arrow">↗</span>
-    </button>
   </div>
   <div class="physique-overview" id="physiqueOverview" aria-live="polite">
     <div class="physique-blueprint">
-      <div class="blueprint-top"><span class="blueprint-kicker">SELECTED BLUEPRINT</span><span class="blueprint-chip" id="physiqueLevelChip">ATHLETIC BUILD</span></div>
-      <h3 id="physiqueCharacterName">Garou</h3>
-      <p id="physiqueDescription">A lean, athletic reference emphasizing movement quality, relative strength and conditioning.</p>
+      <div class="blueprint-top"><span class="blueprint-kicker">SELECTED BLUEPRINT</span><span class="blueprint-chip" id="physiqueLevelChip">BALANCED POWER</span></div>
+      <div class="physique-hero-image"><img id="physiqueCharacterImage" src="goku-reference.jpg" alt="Goku character reference"><span class="physique-image-caption" id="physiqueImageCaption">GOKU · CHARACTER REFERENCE</span></div>
+      <h3 id="physiqueCharacterName">Goku</h3>
+      <p id="physiqueDescription">A muscular, balanced reference emphasizing progressive strength, full-body training and recovery.</p>
       <div class="physique-focus-list" id="physiqueFocusList">
         <span>Shoulders & back</span><span>Core stability</span><span>Leg strength</span><span>Conditioning</span>
       </div>
