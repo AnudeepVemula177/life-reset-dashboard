@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b14"><title>Life Reset — Command Center</title><link rel="stylesheet" href="style.css"></head>
 <body><div class="shell">
-<aside class="sidebar"><a class="brand" href="#home"><span class="logo">LR</span><span><b>LIFE RESET</b><small>PERSONAL COMMAND CENTER</small></span></a><p class="label">WORKSPACE</p><nav><a class="active" href="#home">◈ &nbsp; Overview</a><a href="#focus">◷ &nbsp; Focus room</a><a href="#tasks">☑ &nbsp; My tasks</a><a href="#habits">✳ &nbsp; Daily habits</a></nav><div class="sidebottom"><div class="live"><i></i><span><b>You're in control</b><small>One step at a time.</small></span></div><div class="dailyquote"><small>✦ QUOTE OF THE DAY</small><p id="dailyQuote">You don't need a perfect day. You need a start.</p><span id="quoteAuthor">— Life Reset</span><a href="https://zenquotes.io/" target="_blank" rel="noopener" id="quoteSource">Inspirational quotes · ZenQuotes</a></div><button id="resetDay">↻ Reset today's checks</button></div></aside>
+<aside class="sidebar"><a class="brand" href="#home"><span class="logo">LR</span><span><b>LIFE RESET</b><small>PERSONAL COMMAND CENTER</small></span></a><p class="label">WORKSPACE</p><nav><a class="active" href="#home">◈ &nbsp; Overview</a><a href="#focus">◷ &nbsp; Focus room</a><a href="#tasks">☑ &nbsp; My tasks</a><a href="#habits">✳ &nbsp; Daily habits</a><a href="#physique">⚡ &nbsp; Anime physique</a></nav><div class="sidebottom"><div class="live"><i></i><span><b>You're in control</b><small>One step at a time.</small></span></div><div class="dailyquote"><small>✦ QUOTE OF THE DAY</small><p id="dailyQuote">You don't need a perfect day. You need a start.</p><span id="quoteAuthor">— Life Reset</span><a href="https://zenquotes.io/" target="_blank" rel="noopener" id="quoteSource">Inspirational quotes · ZenQuotes</a></div><button id="resetDay">↻ Reset today's checks</button></div></aside>
 <main id="home"><header><div class="mobilebrand"><span class="logo mini">LR</span><b>LIFE RESET</b></div><div class="date"><small>YOUR PERSONAL COMMAND CENTER</small><b id="today">Today</b></div><div class="actions"><span class="status"><i></i> SYSTEM READY</span><button id="resetDayMobile" class="mobile-reset" type="button" title="Reset today’s task and habit checks">↻ Reset</button><button id="backupData" title="Export your progress">⇩ Backup</button><button id="theme" title="Change accent">✦</button></div></header>
 <section class="hero"><div><small class="cyan" id="welcomeLine">YOUR NEXT CHAPTER STARTS HERE</small><h1 id="heroTitle">Reset your day.<br><em>Rebuild your future.</em></h1><p id="heroSubtitle">Small steps. Real progress. One day at a time.</p><div class="heroactions"><a class="primary" href="#tasks">Plan my day ↗</a><a href="#focus" class="textlink">Start a focus session →</a></div></div><div class="orb"><div class="core">LR<span>+</span></div><i></i></div></section>
 <section class="stats"><article><small>TASKS COMPLETED</small><div class="number"><b id="done">0</b><span id="total">/ 3</span></div><p>Keep moving forward</p></article><article><small>DAILY PROGRESS</small><div class="number"><b id="percent">0</b><span>%</span></div><div class="track"><i id="bar"></i></div></article><article><small>FOCUS TIME TODAY</small><div class="number"><b id="minutes">0</b><span>min</span></div><p>Every minute counts</p></article><article><small>YOUR STREAK</small><div class="number"><b id="streak">0</b><span>days</span></div><p>Consistency, not pressure</p></article></section>
@@ -58,6 +58,84 @@
  </div>
  </details>
 </section>
+
+<section class="panel physique-panel" id="physique" aria-labelledby="physiqueTitle">
+  <div class="heading">
+    <div><small>BUILD YOUR REAL-WORLD BLUEPRINT</small><h2 id="physiqueTitle">Anime Physique</h2></div>
+    <span class="tag">BETA · REALISTIC PLAN</span>
+  </div>
+  <p class="sub">Choose a character-inspired training direction. The character blueprint stays fixed; the workout adapts to your experience, equipment and schedule.</p>
+  <div class="physique-notice">⚠️ Anime physiques are stylized references, not guaranteed outcomes. This plan focuses on safe, real-world strength, fitness and consistency.</div>
+  <div class="physique-character-grid" id="physiqueCharacters">
+    <button type="button" class="physique-character selected" data-character="garou" aria-pressed="true">
+      <span class="character-mark">狼</span><span class="character-copy"><b>Garou</b><small>Athletic · lean strength</small></span><span class="character-arrow">↗</span>
+    </button>
+    <button type="button" class="physique-character" data-character="saitama" aria-pressed="false">
+      <span class="character-mark">一</span><span class="character-copy"><b>Saitama</b><small>Simple · bodyweight base</small></span><span class="character-arrow">↗</span>
+    </button>
+    <button type="button" class="physique-character" data-character="goku" aria-pressed="false">
+      <span class="character-mark">悟</span><span class="character-copy"><b>Goku</b><small>Muscular · balanced power</small></span><span class="character-arrow">↗</span>
+    </button>
+  </div>
+  <div class="physique-overview" id="physiqueOverview" aria-live="polite">
+    <div class="physique-blueprint">
+      <div class="blueprint-top"><span class="blueprint-kicker">SELECTED BLUEPRINT</span><span class="blueprint-chip" id="physiqueLevelChip">ATHLETIC BUILD</span></div>
+      <h3 id="physiqueCharacterName">Garou</h3>
+      <p id="physiqueDescription">A lean, athletic reference emphasizing movement quality, relative strength and conditioning.</p>
+      <div class="physique-focus-list" id="physiqueFocusList">
+        <span>Shoulders & back</span><span>Core stability</span><span>Leg strength</span><span>Conditioning</span>
+      </div>
+      <div class="blueprint-foot"><span>BLUEPRINT STATUS</span><b>Fixed reference · adaptable plan</b></div>
+    </div>
+    <div class="physique-settings">
+      <div class="physique-settings-heading"><small>PERSONALIZE THE PLAN</small><b>Training setup</b></div>
+      <label class="physique-field">Experience
+        <select id="physiqueExperience"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select>
+      </label>
+      <label class="physique-field">Equipment
+        <select id="physiqueEquipment"><option value="home">Home · no equipment</option><option value="basic">Basic equipment</option><option value="gym">Full gym</option></select>
+      </label>
+      <label class="physique-field">Days per week
+        <select id="physiqueDays"><option value="3">3 days</option><option value="4" selected>4 days</option><option value="5">5 days</option></select>
+      </label>
+      <label class="physique-field">Session length
+        <select id="physiqueDuration"><option value="20">20 minutes</option><option value="30" selected>30 minutes</option><option value="45">45 minutes</option><option value="60">60 minutes</option></select>
+      </label>
+      <button type="button" class="primary" id="generatePhysiquePlan">Generate my plan ↗</button>
+    </div>
+  </div>
+  <div class="physique-plan-grid">
+    <article class="physique-subpanel">
+      <div class="heading"><div><small>YOUR TRAINING BLUEPRINT</small><h3>Weekly workout</h3></div><span class="tag" id="physiqueScheduleTag">4 DAYS</span></div>
+      <div id="physiqueWorkout" class="physique-workout"></div>
+    </article>
+    <article class="physique-subpanel">
+      <div class="heading"><div><small>FUEL THE WORK</small><h3>Indian diet guide</h3></div><span class="tag">FLEXIBLE</span></div>
+      <p class="physique-diet-note">Use portions that fit your appetite, budget and needs. Include protein at meals; no supplements are required.</p>
+      <div id="physiqueDiet" class="physique-diet"></div>
+    </article>
+  </div>
+  <div class="physique-progress">
+    <div class="heading"><div><small>CONSISTENCY OVER PERFECTION</small><h3>Progress tracker</h3></div><span class="tag" id="physiqueProgressTag">0 WORKOUTS</span></div>
+    <div class="physique-progress-form">
+      <label class="physique-field">Workout completed
+        <select id="physiqueWorkoutType"><option value="Strength session">Strength session</option><option value="Conditioning session">Conditioning session</option><option value="Mobility / recovery">Mobility / recovery</option></select>
+      </label>
+      <label class="physique-field">How did it feel?
+        <select id="physiqueEffort"><option value="Easy">Easy</option><option value="Good" selected>Good</option><option value="Challenging">Challenging</option></select>
+      </label>
+      <button type="button" class="primary" id="logPhysiqueWorkout">+ Log workout</button>
+    </div>
+    <div class="physique-progress-stats">
+      <div><small>WORKOUTS LOGGED</small><b id="physiqueWorkoutCount">0</b></div>
+      <div><small>THIS WEEK</small><b id="physiqueWeekCount">0</b></div>
+      <div><small>CONSISTENCY</small><b id="physiqueConsistency">Start today</b></div>
+    </div>
+    <div id="physiqueHistory" class="physique-history"></div>
+    <p class="physique-disclaimer">Milestones are based on consistency, not a promise to look exactly like a fictional character. Increase difficulty gradually, prioritize technique, sleep and recovery, and stop if you feel sharp pain.</p>
+  </div>
+</section>
+
 <section class="panel habits" id="habits"><div class="heading"><div><small>SMALL PROMISES, KEPT DAILY</small><h2>Daily habits</h2></div><span class="tag">TODAY</span></div><div class="habitsummary"><span id="habitCount">0 of 4 habits complete</span><div class="track"><i id="habitBar"></i></div></div><div class="habitgrid"><label><input type="checkbox" data-habit="water"><span class="check">✓</span><span>💧</span><div><b>Drink water</b><small>Start with one glass</small></div></label><label><input type="checkbox" data-habit="move"><span class="check">✓</span><span>⚡</span><div><b>Move your body</b><small>Stretch or take a walk</small></div></label><label><input type="checkbox" data-habit="learn"><span class="check">✓</span><span>📚</span><div><b>Learn something</b><small>Even 15 minutes counts</small></div></label><label><input type="checkbox" data-habit="plan"><span class="check">✓</span><span>🌙</span><div><b>Plan tomorrow</b><small>Write one next step</small></div></label></div></section>
 <section class="panel personal-panel" id="personalize"><div class="heading"><div><small>MAKE IT YOURS</small><h2>Your daily setup</h2></div><span class="tag">PERSONAL</span></div><p class="sub">Set a name and a focus goal that feels realistic for you. Your choices stay saved in this browser.</p><form id="profileForm" class="profile-form"><label class="profile-field"><span>Your name or nickname</span><input id="profileName" maxlength="32" placeholder="What should we call you?" autocomplete="nickname"></label><label class="profile-field"><span>Daily focus goal</span><select id="focusGoal"><option value="15">15 minutes · gentle start</option><option value="25" selected>25 minutes · steady progress</option><option value="45">45 minutes · deep work</option><option value="60">60 minutes · big focus day</option><option value="90">90 minutes · ambitious day</option></select></label><button class="primary" type="submit">Save my setup</button></form><div class="goal-progress"><div><span>Today's focus goal</span><b id="focusGoalLabel">0 / 25 min</b></div><div class="track"><i id="focusGoalBar"></i></div></div></section>
 <footer><span>© LIFE RESET · BUILT ONE STEP AT A TIME</span><span id="saveStatus">Changes save on this browser</span><button type="button" id="importData">Import backup</button><input type="file" id="importFile" accept="application/json,.json" hidden></footer></main></div><button type="button" id="miniMusicJump" class="mini-music-jump" hidden>♫ <span id="miniMusicLabel">Music loaded</span> <b>Jump to player ↑</b></button><div id="toast" role="status"></div><script src="script.js"></script></body></html>

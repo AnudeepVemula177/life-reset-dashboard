@@ -1,166 +1,394 @@
-const $=id=>document.getElementById(id),KEY="lifeResetV3",HISTORY="lifeResetHistoryV3";
-function localDate(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
-const todayKey=localDate(),defaults=()=>({date:todayKey,tasks:[{id:1,text:"Study or learn for 25 minutes",done:false},{id:2,text:"Move your body for a little while",done:false},{id:3,text:"Plan tomorrow before sleeping",done:false}],habits:{water:false,move:false,learn:false,plan:false},focusSeconds:0,streak:0});
-function load(){try{let s=JSON.parse(localStorage.getItem(KEY));if(!s)return defaults();if(s.date!==todayKey){let oldHistory=JSON.parse(localStorage.getItem(HISTORY))||{};const oldHabits=s.habits&&typeof s.habits==='object'?s.habits:{},oldHabitsDone=Object.values(oldHabits).filter(Boolean).length;oldHistory[s.date]={...(oldHistory[s.date]||{}),tasksDone:(Array.isArray(s.tasks)?s.tasks:[]).filter(t=>t&&t.done).length,tasksTotal:Array.isArray(s.tasks)?s.tasks.length:0,habitsDone:oldHabitsDone,focusMinutes:Math.floor(Math.max(0,Number(s.focusSeconds)||0)/60),completeHabits:Object.keys(oldHabits).length>=4&&oldHabitsDone>=4};localStorage.setItem(HISTORY,JSON.stringify(oldHistory));return defaults()}return {...defaults(),...s,habits:{...defaults().habits,...s.habits}}}catch{return defaults()}}
-function readHistory(){try{return JSON.parse(localStorage.getItem(HISTORY))||{}}catch{return {}}}
-let state=load(),history=readHistory(),duration=1500,left=1500,interval=null,running=false,filter="all",prioritySort=false,taskQuery="",profile={name:"",focusGoal:25};
-try{profile={...profile,...JSON.parse(localStorage.getItem("lifeResetProfile")||"{}")} }catch{}
-function save(){try{state.date=todayKey;history[todayKey]={...(history[todayKey]||{}),tasksDone:state.tasks.filter(t=>t.done).length,tasksTotal:state.tasks.length,habitsDone:Object.values(state.habits).filter(Boolean).length,focusMinutes:Math.floor(state.focusSeconds/60),completeHabits:Object.values(state.habits).every(Boolean)};localStorage.setItem(KEY,JSON.stringify(state));localStorage.setItem(HISTORY,JSON.stringify(history));$("saveStatus").textContent="Progress saved on this browser ✓"}catch{$("saveStatus").textContent="Browser storage unavailable"}}
-function toast(s){let t=$("toast");t.textContent=s;t.classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove("show"),2100)}
-function esc(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function computeStreak(){let n=0,d=new Date();const qualifies=k=>{const h=history[k];return !!(h&&(h.completeHabits||h.habitsDone>=4))};if(!qualifies(todayKey))d.setDate(d.getDate()-1);for(let i=0;i<366;i++){if(!qualifies(localDate(d)))break;n++;d.setDate(d.getDate()-1)}return n}
-function renderInsights(){const chart=$("weekChart"),cal=$("streakCalendar");if(!chart||!cal)return;chart.innerHTML="";cal.innerHTML="";let days=[],base=new Date();base.setDate(base.getDate()-6);let total=0,best={label:"",pct:-1};for(let i=0;i<7;i++){let d=new Date(base);d.setDate(base.getDate()+i);let key=localDate(d),h=history[key]||{},isToday=key===todayKey;let tasksDone=isToday?state.tasks.filter(t=>t.done).length:(h.tasksDone||0),tasksTotal=isToday?state.tasks.length:(h.tasksTotal||0),habitsDone=isToday?Object.values(state.habits).filter(Boolean).length:(h.habitsDone||0),focus=isToday?Math.floor(state.focusSeconds/60):(h.focusMinutes||0);let taskPct=tasksTotal?tasksDone/tasksTotal:0,habitPct=habitsDone/4,focusPct=Math.min(focus/25,1),pct=Math.round((taskPct*0.45+habitPct*0.4+focusPct*0.15)*100);if(!tasksTotal&&!habitsDone&&!focus)pct=0;days.push({key,label:d.toLocaleDateString(undefined,{weekday:"short"}),day:d.getDate(),pct,habitsDone});total+=pct;if(pct>best.pct)best={label:d.toLocaleDateString(undefined,{weekday:"long"}),pct};let el=document.createElement("div");el.className="weekday";el.innerHTML=`<div class="bararea"><span class="barvalue">${pct}%</span><i class="weekbar" style="height:${Math.max(pct,3)}%"></i></div><small>${d.toLocaleDateString(undefined,{weekday:"short"})}</small>`;el.title=`${key}: ${pct}% progress · ${focus} focus min`;chart.appendChild(el)}$("weekSummary").textContent=Math.round(total/7)+"% average";$("weekBest").textContent=best.pct>0?"Best day: "+best.label+" ("+best.pct+"%)":"Your first win is waiting today.";days.forEach(x=>{let e=document.createElement("div");e.className="calday"+(x.key===todayKey?" is-today":"");e.innerHTML=`<span class="calbox ${x.habitsDone>=4?"all-done":x.habitsDone>0?"some-done":"not-done"}" title="${x.habitsDone} of 4 habits"></span><small>${x.label}</small><b>${x.day}</b>`;cal.appendChild(e)})}
-function render(){let list=$("taskList");list.innerHTML="";let query=taskQuery.trim().toLowerCase();let shown=state.tasks.filter(t=>(filter==="all"||(filter==="active"&&!t.done)||(filter==="done"&&t.done))&&(!query||t.text.toLowerCase().includes(query)));if(prioritySort){const rank={high:0,normal:1,low:2};shown.sort((a,b)=>(a.done-b.done)||((rank[a.priority]??1)-(rank[b.priority]??1)))}shown.forEach(t=>{let row=document.createElement("div");row.className="task"+(t.done?" done":"")+" priority-"+(t.priority||"normal");row.innerHTML=`<button class="check" aria-label="Toggle task completion">✓</button><span class="txt">${esc(t.text)}</span><span class="priority-label">${({high:"HIGH",normal:"NORMAL",low:"LOW"})[t.priority||"normal"]}</span><button class="edit-task" type="button" aria-label="Edit task">Edit</button><button class="del" aria-label="Delete task">×</button>`;row.querySelector(".check").onclick=()=>{t.done=!t.done;update();toast(t.done?"Task completed — nice work!":"Task marked active")};row.querySelector(".edit-task").onclick=()=>{const next=prompt("Edit your task",t.text);if(next===null)return;const clean=next.trim();if(!clean){toast("Task cannot be empty");return}t.text=clean;update();toast("Task updated ✓")};row.querySelector(".del").onclick=()=>{state.tasks=state.tasks.filter(x=>x.id!==t.id);update();toast("Task removed")};list.appendChild(row)});$("countAll").textContent=state.tasks.length;$("countActive").textContent=state.tasks.filter(t=>!t.done).length;$("countDone").textContent=state.tasks.filter(t=>t.done).length;$("empty").hidden=shown.length>0;$("empty").textContent=state.tasks.length===0?"No tasks yet. Add one small goal to begin.":"No tasks in this filter.";let d=state.tasks.filter(t=>t.done).length,p=state.tasks.length?Math.round(d/state.tasks.length*100):0;$("done").textContent=d;$("total").textContent="/ "+state.tasks.length;$("percent").textContent=p;$("bar").style.width=p+"%";$("minutes").textContent=Math.floor(state.focusSeconds/60);let focusMins=Math.floor(state.focusSeconds/60),goal=Math.max(1,Number(profile.focusGoal)||25);$("focusGoalLabel").textContent=focusMins+" / "+goal+" min";$("focusGoalBar").style.width=Math.min(100,focusMins/goal*100)+"%";$("streak").textContent=computeStreak();$("left").textContent=(state.tasks.length-d)+" task"+(state.tasks.length-d===1?"":"s")+" left";$("taskTag").textContent=state.tasks.length+" tasks";document.querySelectorAll("[data-habit]").forEach(c=>c.checked=!!state.habits[c.dataset.habit]);let hc=Object.values(state.habits).filter(Boolean).length;$("habitCount").textContent=hc+" of 4 habits complete";$("habitBar").style.width=(hc/4*100)+"%";save();renderInsights()}
-function update(){render()}
-function fmt(n){return String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0")}
-function timerUI(){$("clock").textContent=fmt(left);let deg=(duration-left)/duration*360;$("timerRing").style.background=`conic-gradient(var(--accent) ${deg}deg,#303652 ${deg}deg)`;$("timerStatus").textContent=running?"FOCUS IN PROGRESS":left===0?"SESSION COMPLETE":"READY WHEN YOU ARE";$("start").textContent=running?"Ⅱ Pause focus":left===0?"↻ Start again":"▶ Start focus";document.title=fmt(left)+" — Life Reset"}
-function stop(){clearInterval(interval);interval=null;running=false}
-function tick(){if(left>0){left--;state.focusSeconds++;timerUI();if(left%5===0)save()}if(left===0){stop();timerUI();render();toast("Focus session complete — nice work!")}}
-function applyProfile(){const name=(profile.name||"").trim();$("welcomeLine").textContent=name?`WELCOME BACK, ${name.toLocaleUpperCase()} · YOUR NEXT CHAPTER STARTS HERE`:"YOUR NEXT CHAPTER STARTS HERE";$("profileName").value=profile.name||"";$("focusGoal").value=String(profile.focusGoal||25);$("heroSubtitle").textContent=name?`Your space, your pace, ${name}. Small steps still count.`:"Small steps. Real progress. One day at a time."}
-$("profileForm").onsubmit=e=>{e.preventDefault();profile.name=$("profileName").value.trim();profile.focusGoal=Number($("focusGoal").value)||25;try{localStorage.setItem("lifeResetProfile",JSON.stringify(profile))}catch{}applyProfile();render();toast("Your personal setup is saved ✓")};
-$("start").onclick=()=>{if(running){stop();timerUI();save();return}if(left===0)left=duration;running=true;timerUI();interval=setInterval(tick,1000)};
-$("resetTimer").onclick=()=>{stop();left=duration;timerUI();toast("Timer reset")};
-document.querySelectorAll("[data-min]").forEach(b=>b.onclick=()=>{stop();duration=Number(b.dataset.min)*60;left=duration;document.querySelectorAll("[data-min]").forEach(x=>x.classList.toggle("selected",x===b));timerUI()});
-document.querySelectorAll("[data-filter]").forEach(b=>b.onclick=()=>{filter=b.dataset.filter;document.querySelectorAll("[data-filter]").forEach(x=>x.classList.toggle("active",x===b));render()});
-$("taskSearch").addEventListener("input",e=>{taskQuery=e.target.value;render()});$("sortTasks").onclick=()=>{prioritySort=!prioritySort;$("sortTasks").textContent=prioritySort?"↕ Default order":"↕ Priority first";render();toast(prioritySort?"High-priority tasks shown first":"Original task order restored")};
-$("taskForm").onsubmit=e=>{e.preventDefault();let input=$("taskInput"),text=input.value.trim();if(!text){input.focus();return}state.tasks.push({id:Date.now(),text,done:false,priority:$("taskPriority").value});input.value="";$("taskPriority").value="normal";filter="all";document.querySelectorAll("[data-filter]").forEach(x=>x.classList.toggle("active",x.dataset.filter==="all"));update();toast("Goal added")};
-$("clearDone").onclick=()=>{let n=state.tasks.length;state.tasks=state.tasks.filter(t=>!t.done);update();toast(n===state.tasks.length?"No completed tasks yet":"Completed tasks cleared")};
-document.querySelectorAll("[data-habit]").forEach(c=>c.onchange=()=>{state.habits[c.dataset.habit]=c.checked;update();if(Object.values(state.habits).every(Boolean))toast("All daily habits complete! Great consistency.")});
-$("resetDay").onclick=()=>{if(confirm("Reset task and habit checkmarks? Focus time will stay.")){state.tasks.forEach(t=>t.done=false);Object.keys(state.habits).forEach(k=>state.habits[k]=false);delete history[todayKey];update();toast("Today's checks reset")}};
-const mobileResetButton=$("resetDayMobile");if(mobileResetButton)mobileResetButton.addEventListener("click",()=>$("resetDay").click());
-$("theme").onclick=()=>{document.body.classList.toggle("mint");try{localStorage.setItem("lifeResetMint",document.body.classList.contains("mint")?"1":"0")}catch{}toast("Accent colour changed")};
-try{if(localStorage.getItem("lifeResetMint")==="1")document.body.classList.add("mint")}catch{}
-$("today").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});applyProfile();render();renderInsights();timerUI();
-
-// Portable backup: export and import this browser's Life Reset data.
-$("backupData").onclick=()=>{save();const payload={app:"Life Reset",version:1,exportedAt:new Date().toISOString(),state,history,profile,theme:document.body.classList.contains("mint")?"aqua":"purple"};const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`life-reset-backup-${todayKey}.json`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);toast("Backup downloaded ✓")};
-$("importData").onclick=()=>$("importFile").click();
-$("importFile").onchange=async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!data||data.app!=="Life Reset"||!data.state||!Array.isArray(data.state.tasks)||!data.state.habits)throw new Error("Invalid backup");if(!confirm("Import this backup and replace the current browser data? Download a backup first if you want to keep the current progress."))return;state={...defaults(),...data.state,date:todayKey,habits:{...defaults().habits,...data.state.habits},tasks:data.state.tasks.map(t=>({id:Number(t.id)||Date.now()+Math.random(),text:String(t.text||"Untitled task").slice(0,90),done:!!t.done,priority:["high","normal","low"].includes(t.priority)?t.priority:"normal"}))};history=data.history&&typeof data.history==="object"?data.history:{};profile={...profile,...(data.profile||{})};try{localStorage.setItem("lifeResetProfile",JSON.stringify(profile));localStorage.setItem("lifeResetMint",data.theme==="aqua"?"1":"0")}catch{}document.body.classList.toggle("mint",data.theme==="aqua");save();applyProfile();render();toast("Backup restored ✓")}catch{alert("This file doesn't look like a valid Life Reset backup.")}finally{e.target.value=""}};
-
-window.addEventListener("beforeunload",save);document.addEventListener("visibilitychange",()=>{if(document.hidden)save()});
-
-// Date-aware quote of the day: cache once per local date, with an offline fallback.
-const dailyQuotes=[
- {q:"You don't need a perfect day. You need a start.",a:"Life Reset"},
- {q:"Great things are done by a series of small things brought together.",a:"Vincent van Gogh"},
- {q:"It always seems impossible until it's done.",a:"Nelson Mandela"},
- {q:"The secret of getting ahead is getting started.",a:"Mark Twain"},
- {q:"You are never too old to set another goal or to dream a new dream.",a:"C. S. Lewis"},
- {q:"Success is the sum of small efforts, repeated day in and day out.",a:"Robert Collier"},
- {q:"Believe you can and you're halfway there.",a:"Theodore Roosevelt"},
- {q:"Action is the foundational key to all success.",a:"Pablo Picasso"}
-];
-function showDailyQuote(q,a,isOnline=false){const el=$("dailyQuote"),author=$("quoteAuthor"),link=$("quoteSource");if(!el||!author)return;el.textContent='“'+q+'”';author.textContent='— '+(a||'Unknown');if(link){link.hidden=!isOnline;link.setAttribute('aria-hidden',String(!isOnline));}}
-async function initDailyQuote(){
- const cacheKey='lifeResetQuoteV2';
- let cached=null;
- try{cached=JSON.parse(localStorage.getItem(cacheKey)||'null')}catch{}
- if(cached&&cached.date===todayKey&&typeof cached.q==='string'&&cached.q){showDailyQuote(cached.q,cached.a, cached.online===true);return}
- const dayIndex=Math.floor(new Date(todayKey+'T12:00:00').getTime()/86400000)%dailyQuotes.length;
- const fallback=dailyQuotes[(dayIndex+dailyQuotes.length)%dailyQuotes.length];
- // Show a deterministic fallback immediately; only show ZenQuotes attribution for a real API quote.
- showDailyQuote(fallback.q,fallback.a,false);
- let quote={date:todayKey,...fallback,online:false};
- const controller=new AbortController();
- const timeout=setTimeout(()=>controller.abort(),4500);
- try{
-  const response=await fetch('https://zenquotes.io/api/today',{signal:controller.signal,cache:'no-store'});
-  if(!response.ok)throw new Error('Quote service unavailable');
-  const data=await response.json(),item=Array.isArray(data)?data[0]:data;
-  if(item&&typeof item.q==='string'&&item.q.trim()){
-   quote={date:todayKey,q:item.q.trim(),a:String(item.a||'Unknown'),online:true};
-   showDailyQuote(quote.q,quote.a,true);
+/* LIFE RESET — dashboard behavior + Anime Physique module */
+(() => {
+  "use strict";
+  const $ = (s, root = document) => root.querySelector(s);
+  const $$ = (s, root = document) => [...root.querySelectorAll(s)];
+  const STORE = "lifeResetDashboard_v3";
+  const PHYSIQUE_STORE = "lifeResetPhysique_v1";
+  const todayKey = () => new Date().toLocaleDateString("en-CA");
+  const dateLabel = (d = new Date()) => d.toLocaleDateString(undefined, {month:"short", day:"numeric"});
+  const safeParse = (v, fallback) => { try { return v ? JSON.parse(v) : fallback; } catch { return fallback; } };
+  const defaultData = () => ({
+    tasks: [
+      {id: makeId(), text:"Review one topic", done:false, priority:"normal"},
+      {id: makeId(), text:"Move for 15 minutes", done:false, priority:"normal"},
+      {id: makeId(), text:"Plan tomorrow", done:false, priority:"normal"}
+    ],
+    habits:{}, daily:{}, focusMinutes:0, streak:0, lastActive:"", profile:{name:"",goal:25}, theme:"violet",
+    musicFavorites:[], lastUpdated:new Date().toISOString()
+  });
+  function makeId(){ return (globalThis.crypto && crypto.randomUUID) ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`; }
+  let data = safeParse(localStorage.getItem(STORE), null) || defaultData();
+  if (!Array.isArray(data.tasks)) data.tasks = [];
+  if (!data.habits || typeof data.habits !== "object") data.habits = {};
+  if (!data.daily || typeof data.daily !== "object") data.daily = {};
+  if (!data.profile) data.profile = {name:"",goal:25};
+  let activeFilter = "all", searchTerm = "", prioritySort = false;
+  let timerSeconds = 25 * 60, timerInterval = null, timerRunning = false;
+  let audioContext = null, audioNodes = [], audioTimer = null, musicPlaying = false;
+  let currentYt = null, pendingFavoriteUrl = "", pendingFavoriteTitle = "";
+  const habits = ["water","move","learn","plan"];
+  const habitNames = {water:"Drink water",move:"Move your body",learn:"Learn something",plan:"Plan tomorrow"};
+  const quotes = [
+    ["You don't need a perfect day. You need a start.","Life Reset"],
+    ["Discipline is choosing what you want most over what you want now.","Life Reset"],
+    ["Small progress is still progress. Keep going.","Life Reset"],
+    ["Your future is built by the things you repeat.","Life Reset"],
+    ["Do the next useful thing. Then do it again.","Life Reset"]
+  ];
+  function toast(message){
+    const el = $("#toast"); if(!el) return;
+    el.textContent = message; el.classList.add("show");
+    clearTimeout(toast._timer); toast._timer = setTimeout(()=>el.classList.remove("show"),2400);
   }
- }catch(e){/* Offline, blocked cross-origin request, timeout, or service unavailable: keep the daily fallback. */}
- finally{clearTimeout(timeout);try{localStorage.setItem(cacheKey,JSON.stringify(quote))}catch{}}
-}
-initDailyQuote();
+  function save(){
+    data.lastUpdated = new Date().toISOString();
+    try { localStorage.setItem(STORE, JSON.stringify(data)); }
+    catch(e){ console.warn("Could not save Life Reset data", e); }
+    const status = $("#saveStatus"); if(status) status.textContent = "Saved just now · this browser";
+  }
+  function currentDay(){
+    const key = todayKey();
+    if(!data.daily[key]) data.daily[key] = {habits:{},focusMinutes:0};
+    return data.daily[key];
+  }
+  function getDoneTasks(){ return data.tasks.filter(t=>t.done).length; }
+  function getDoneHabits(){ const h=currentDay().habits || {}; return habits.filter(k=>h[k]).length; }
+  function dayProgress(key=todayKey()){
+    const d=data.daily[key] || {habits:{}};
+    const tasks=(d.tasks || []);
+    const taskTotal=tasks.length || data.tasks.length;
+    const taskDone=tasks.length ? tasks.filter(t=>t.done).length : data.tasks.filter(t=>t.done).length;
+    const habitObj=d.habits || {};
+    const habitDone=habits.filter(k=>habitObj[k]).length;
+    const total=taskTotal+habits.length;
+    return total ? Math.round((taskDone+habitDone)/total*100) : 0;
+  }
+  function snapshotDay(){
+    const d=currentDay();
+    d.habits = Object.fromEntries(habits.map(k=>[k,!!d.habits?.[k]]));
+    d.tasks = data.tasks.map(t=>({id:t.id,text:t.text,done:!!t.done,priority:t.priority||"normal"}));
+    d.focusMinutes = d.focusMinutes || 0;
+  }
+  function renderTasks(){
+    const list=$("#taskList"); if(!list) return;
+    let tasks=data.tasks.filter(t=>(activeFilter==="all" || (activeFilter==="done" ? t.done : !t.done)) && t.text.toLowerCase().includes(searchTerm));
+    if(prioritySort) tasks.sort((a,b)=>({high:0,normal:1,low:2}[a.priority||"normal"]-({high:0,normal:1,low:2}[b.priority||"normal"])) || Number(a.done)-Number(b.done));
+    list.innerHTML="";
+    tasks.forEach(task=>{
+      const row=document.createElement("div"); row.className=`task ${task.done?"done":""} priority-${task.priority||"normal"}`; row.dataset.id=task.id;
+      const check=document.createElement("button"); check.type="button"; check.className="check"; check.textContent="✓"; check.setAttribute("aria-label",task.done?"Mark task active":"Complete task");
+      check.addEventListener("click",()=>{task.done=!task.done; snapshotDay(); save(); renderAll();});
+      const txt=document.createElement("span"); txt.className="txt"; txt.textContent=task.text;
+      const priority=document.createElement("span"); priority.className="priority-label"; priority.textContent=({high:"HIGH",normal:"NORMAL",low:"LOW"})[task.priority||"normal"];
+      const edit=document.createElement("button"); edit.type="button"; edit.className="edit-task"; edit.textContent="Edit"; edit.setAttribute("aria-label","Edit task");
+      edit.addEventListener("click",()=>{const next=prompt("Edit task",task.text); if(next===null)return; const val=next.trim(); if(!val){toast("Task text cannot be empty.");return;} task.text=val.slice(0,90); snapshotDay();save();renderAll();});
+      const del=document.createElement("button"); del.type="button"; del.className="del"; del.textContent="×"; del.setAttribute("aria-label","Delete task");
+      del.addEventListener("click",()=>{data.tasks=data.tasks.filter(t=>t.id!==task.id);snapshotDay();save();renderAll();toast("Task removed.");});
+      row.append(check,txt,priority,edit,del); list.append(row);
+    });
+    $("#empty").hidden=tasks.length>0;
+    $("#done").textContent=getDoneTasks(); $("#total").textContent=`/ ${data.tasks.length}`;
+    $("#taskTag").textContent=`${data.tasks.length} task${data.tasks.length===1?"":"s"}`;
+    $("#left").textContent=`${data.tasks.length-getDoneTasks()} tasks left`;
+    $("#countAll").textContent=data.tasks.length;
+    $("#countActive").textContent=data.tasks.filter(t=>!t.done).length;
+    $("#countDone").textContent=getDoneTasks();
+    $$(".filter").forEach(b=>b.classList.toggle("active",b.dataset.filter===activeFilter));
+  }
+  function renderHabits(){
+    const d=currentDay();
+    $$("[data-habit]").forEach(input=>{input.checked=!!d.habits?.[input.dataset.habit];});
+    const count=getDoneHabits();
+    $("#habitCount").textContent=`${count} of ${habits.length} habits complete`;
+    $("#habitBar").style.width=`${count/habits.length*100}%`;
+    const done=getDoneTasks(), total=data.tasks.length;
+    $("#percent").textContent=total+habits.length?Math.round((done+count)/(total+habits.length)*100):0;
+    $("#bar").style.width=`${$("#percent").textContent}%`;
+  }
+  function renderStats(){
+    $("#today").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
+    $("#minutes").textContent=Math.round(data.focusMinutes||0);
+    $("#streak").textContent=calculateStreak();
+    const name=(data.profile.name||"").trim();
+    $("#welcomeLine").textContent=name?`WELCOME BACK, ${name.toUpperCase()}`:"YOUR NEXT CHAPTER STARTS HERE";
+    $("#heroSubtitle").textContent=name?`${name}, small steps. Real progress. One day at a time.`:"Small steps. Real progress. One day at a time.";
+    $("#focusGoal").value=String(data.profile.goal||25);
+    $("#profileName").value=data.profile.name||"";
+    $("#focusGoalLabel").textContent=`${Math.round(data.focusMinutes||0)} / ${data.profile.goal||25} min`;
+    $("#focusGoalBar").style.width=`${Math.min(100,(data.focusMinutes||0)/(data.profile.goal||25)*100)}%`;
+  }
+  function calculateStreak(){
+    let count=0; const d=new Date();
+    for(let i=0;i<365;i++){
+      const key=new Date(d.getFullYear(),d.getMonth(),d.getDate()-i).toLocaleDateString("en-CA");
+      const day=data.daily[key];
+      const complete=day && (habits.every(k=>day.habits?.[k]) || (day.tasks?.length && day.tasks.every(t=>t.done)));
+      if(complete) count++; else if(i===0) continue; else break;
+    }
+    data.streak=count; return count;
+  }
+  function renderWeek(){
+    const chart=$("#weekChart"); if(!chart)return;
+    chart.innerHTML=""; const days=[];
+    for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const key=d.toLocaleDateString("en-CA");days.push({d,key,p:dayProgress(key)});}
+    const avg=Math.round(days.reduce((s,x)=>s+x.p,0)/7);
+    $("#weekSummary").textContent=`${avg}% average`;
+    const best=days.reduce((a,b)=>b.p>a.p?b:a,days[0]);
+    $("#weekBest").textContent=best.p?`Best: ${best.d.toLocaleDateString(undefined,{weekday:"short"})} · ${best.p}%`:"Start with one small win today.";
+    days.forEach(x=>{
+      const col=document.createElement("div");col.className="weekday";
+      const area=document.createElement("div");area.className="bararea";
+      const value=document.createElement("span");value.className="barvalue";value.textContent=`${x.p}%`;
+      const bar=document.createElement("i");bar.className="weekbar";bar.style.height=`${Math.max(3,x.p)}%`;
+      area.append(value,bar);const label=document.createElement("small");label.textContent=x.d.toLocaleDateString(undefined,{weekday:"short"}).slice(0,2);
+      col.append(area,label);chart.append(col);
+    });
+    const cal=$("#streakCalendar");cal.innerHTML="";
+    days.forEach(x=>{
+      const day=data.daily[x.key]||{habits:{}}, n=habits.filter(k=>day.habits?.[k]).length;
+      const cell=document.createElement("div");cell.className="calday"+(x.key===todayKey()?" is-today":"");
+      const box=document.createElement("i");box.className="calbox "+(n===habits.length?"all-done":n?"some-done":"not-done");
+      const label=document.createElement("small");label.textContent=x.d.toLocaleDateString(undefined,{weekday:"short"}).slice(0,2);
+      const num=document.createElement("b");num.textContent=x.d.getDate();
+      cell.append(box,label,num);cal.append(cell);
+    });
+  }
+  function renderAll(){snapshotDay();renderTasks();renderHabits();renderStats();renderWeek();save();}
+  $("#taskForm").addEventListener("submit",e=>{
+    e.preventDefault();const input=$("#taskInput"), text=input.value.trim();if(!text){input.focus();return;}
+    data.tasks.push({id:makeId(),text:text.slice(0,90),done:false,priority:$("#taskPriority").value||"normal"});
+    input.value="";snapshotDay();save();renderAll();toast("Task added.");
+  });
+  $("#taskSearch").addEventListener("input",e=>{searchTerm=e.target.value.trim().toLowerCase();renderTasks();});
+  $$(".filter").forEach(b=>b.addEventListener("click",()=>{activeFilter=b.dataset.filter;renderTasks();}));
+  $("#sortTasks").addEventListener("click",()=>{prioritySort=!prioritySort;$("#sortTasks").textContent=prioritySort?"↕ Natural order":"↕ Priority first";renderTasks();});
+  $("#clearDone").addEventListener("click",()=>{data.tasks=data.tasks.filter(t=>!t.done);snapshotDay();save();renderAll();toast("Completed tasks cleared.");});
+  $$("[data-habit]").forEach(input=>input.addEventListener("change",()=>{currentDay().habits[input.dataset.habit]=input.checked;snapshotDay();save();renderAll();}));
+  function resetDay(){currentDay().habits={};data.tasks.forEach(t=>t.done=false);snapshotDay();save();renderAll();toast("Today's checks reset.");}
+  $("#resetDay").addEventListener("click",resetDay);$("#resetDayMobile").addEventListener("click",resetDay);
+  $("#theme").addEventListener("click",()=>{document.body.classList.toggle("mint");data.theme=document.body.classList.contains("mint")?"mint":"violet";save();});
+  if(data.theme==="mint")document.body.classList.add("mint");
+  $("#profileForm").addEventListener("submit",e=>{e.preventDefault();data.profile.name=$("#profileName").value.trim().slice(0,32);data.profile.goal=Number($("#focusGoal").value)||25;save();renderStats();toast("Your setup is saved.");});
+  $("#backupData").addEventListener("click",()=>{
+    const blob=new Blob([JSON.stringify({version:3,exportedAt:new Date().toISOString(),data,physique:safeParse(localStorage.getItem(PHYSIQUE_STORE),null)},null,2)],{type:"application/json"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`life-reset-backup-${todayKey()}.json`;a.click();URL.revokeObjectURL(a.href);toast("Backup downloaded.");
+  });
+  $("#importData").addEventListener("click",()=>$("#importFile").click());
+  $("#importFile").addEventListener("change",async e=>{
+    const file=e.target.files?.[0];if(!file)return;
+    try{
+      const parsed=JSON.parse(await file.text());const incoming=parsed.data||parsed;
+      if(!Array.isArray(incoming.tasks)||!incoming.profile)throw new Error("This doesn't look like a Life Reset backup.");
+      data={...defaultData(),...incoming};if(parsed.physique)localStorage.setItem(PHYSIQUE_STORE,JSON.stringify(parsed.physique));save();renderAll();loadPhysique();toast("Backup imported.");
+    }catch(err){toast(err.message||"Could not import this file.");}
+    e.target.value="";
+  });
 
+  // Focus timer
+  function updateClock(){const m=Math.floor(timerSeconds/60),s=timerSeconds%60;$("#clock").textContent=`${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;$("#timerRing").style.background=`conic-gradient(var(--accent) ${Math.max(0,1-timerSeconds/(Number($("#selectedMinutes")?.value||25)*60))*360}deg,#303652 0deg)`;}
+  function stopTimer(){clearInterval(timerInterval);timerInterval=null;timerRunning=false;$("#start").textContent="▶ Start focus";$("#timerStatus").textContent="READY WHEN YOU ARE";}
+  $$(".presets button").forEach(b=>b.addEventListener("click",()=>{stopTimer();timerSeconds=Number(b.dataset.min)*60;$$(".presets button").forEach(x=>x.classList.toggle("selected",x===b));updateClock();}));
+  $("#start").addEventListener("click",()=>{
+    if(timerRunning){stopTimer();return;}
+    timerRunning=true;$("#start").textContent="Ⅱ Pause";$("#timerStatus").textContent="FOCUS IN PROGRESS";
+    timerInterval=setInterval(()=>{
+      timerSeconds--;updateClock();
+      if(timerSeconds<=0){stopTimer();const mins=Number($(".presets button.selected")?.dataset.min||25);data.focusMinutes=(data.focusMinutes||0)+mins;currentDay().focusMinutes=(currentDay().focusMinutes||0)+mins;save();renderStats();toast(`Focus complete · ${mins} minutes logged.`);$("#timerStatus").textContent="SESSION COMPLETE";}
+    },1000);
+  });
+  $("#resetTimer").addEventListener("click",()=>{stopTimer();timerSeconds=Number($(".presets button.selected")?.dataset.min||25)*60;updateClock();});
+  updateClock();
 
-// Motivational Music Mode: original procedural soundscapes via the Web Audio API.
-// Playback is always manual; no third-party audio files or auto-play.
-(()=>{
- const panel=$('music'),toggle=$('musicToggle'),volume=$('musicVolume');
- if(!panel||!toggle||!volume)return;
- const names={lofi:'Lo-fi flow',rain:'Rainy focus',cinematic:'Epic drive',nature:'Calm nature'};
- let mood='lofi',ctx=null,master=null,playing=false,loopId=null,step=0,nodes=[],noiseSource=null;
- const scale={lofi:[196,233.08,293.66,349.23,392,349.23,293.66,233.08],rain:[146.83,174.61,220,261.63,220,174.61],cinematic:[110,130.81,164.81,196,220,196,164.81,130.81],nature:[174.61,196,220,261.63,293.66,261.63,220,196]};
- function keep(node){nodes.push(node);return node}
- function tone(freq,when,duration,type='sine',gain=.04,detune=0){
-  const osc=ctx.createOscillator(),amp=ctx.createGain();osc.type=type;osc.frequency.setValueAtTime(freq,when);osc.detune.setValueAtTime(detune,when);amp.gain.setValueAtTime(.0001,when);amp.gain.exponentialRampToValueAtTime(Math.max(.0002,gain),when+.08);amp.gain.setTargetAtTime(.0001,when+Math.max(.1,duration-.15),.12);osc.connect(amp);amp.connect(master);osc.start(when);osc.stop(when+duration+.5);keep(osc);keep(amp);
- }
- function chord(when,notes,volume=.018,duration=2.7){notes.forEach((n,i)=>{tone(n,when,duration,'sine',volume,i%2?3:-3);tone(n*2,when,duration,'triangle',volume*.23,0)})}
- function rainBed(){const size=ctx.sampleRate*2;const buffer=ctx.createBuffer(1,size,ctx.sampleRate);const data=buffer.getChannelData(0);for(let i=0;i<size;i++)data[i]=(Math.random()*2-1)*.24;noiseSource=ctx.createBufferSource();noiseSource.buffer=buffer;noiseSource.loop=true;const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=mood==='rain'?1150:650;const gain=ctx.createGain();gain.gain.value=mood==='rain'?.13:.055;noiseSource.connect(filter);filter.connect(gain);gain.connect(master);noiseSource.start();keep(noiseSource);keep(filter);keep(gain)}
- function beat(){if(!playing||!ctx)return;const now=ctx.currentTime,notes=scale[mood]||scale.lofi;const idx=step%notes.length;
-  if(mood==='lofi'){tone(notes[idx],now,1.1,'triangle',.045);if(step%4===0){tone(notes[idx]*.5,now,1.8,'sine',.07);chord(now+.03,[notes[idx],notes[(idx+2)%notes.length],notes[(idx+4)%notes.length]],.009,2.4)}if(step%2===1)tone(1200,now,.06,'sine',.006)}
-  else if(mood==='rain'){tone(notes[idx],now,1.8,'sine',.025);if(step%4===0)chord(now,[notes[idx],notes[(idx+2)%notes.length]],.006,3.2)}
-  else if(mood==='cinematic'){if(step%2===0){chord(now,[notes[idx],notes[(idx+2)%notes.length],notes[(idx+4)%notes.length]],.022,3.5);tone(notes[idx]*.5,now,3.4,'sine',.055)}else tone(notes[idx]*2,now,.8,'triangle',.012)}
-  else {tone(notes[idx],now,2.1,'sine',.025);if(step%3===0)tone(notes[(idx+3)%notes.length]*2,now,1.6,'sine',.009)}
-  step++;}
- function cleanup(){if(loopId){clearInterval(loopId);loopId=null}nodes.forEach(n=>{try{if(n.stop)n.stop()}catch{}try{n.disconnect()}catch{}});nodes=[];noiseSource=null}
- function status(text){$('musicStatus').textContent=text}
- async function start(){try{const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio){status('This browser does not support Web Audio');return}if(!ctx)ctx=new Audio();if(ctx.state==='suspended')await ctx.resume();cleanup();master=ctx.createGain();master.gain.value=Number(volume.value)/100*.28;master.connect(ctx.destination);playing=true;step=0;if(mood==='rain'||mood==='nature')rainBed();beat();loopId=setInterval(beat,mood==='cinematic'?850:1050);toggle.textContent='Ⅱ Pause soundscape';toggle.setAttribute('aria-pressed','true');panel.classList.add('is-playing');status('Playing · '+names[mood]);$('musicNote').textContent='Soundscape is generated locally in your browser. Change mood anytime; press Pause to stop.'}catch(err){playing=false;status('Audio could not start — try Play again');toast('Could not start audio in this browser')}}
- function pause(){playing=false;if(loopId){clearInterval(loopId);loopId=null}cleanup();if(master){try{master.gain.setTargetAtTime(.0001,ctx.currentTime,.03)}catch{}try{master.disconnect()}catch{}master=null}toggle.textContent='▶ Play soundscape';toggle.setAttribute('aria-pressed','false');panel.classList.remove('is-playing');status('Paused · '+names[mood])}
- toggle.addEventListener('click',()=>{if(playing)pause();else start()});
- document.querySelectorAll('[data-mood]').forEach(button=>button.addEventListener('click',()=>{mood=button.dataset.mood;document.querySelectorAll('[data-mood]').forEach(b=>{const selected=b===button;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected))});$('musicTrackName').textContent=names[mood];status((playing?'Playing':'Ready')+' · '+names[mood]);if(playing)start()}));
- volume.addEventListener('input',()=>{$('musicVolumeValue').textContent=volume.value+'%';if(master&&ctx)master.gain.setTargetAtTime(Number(volume.value)/100*.28,ctx.currentTime,.04)});
- window.addEventListener('pagehide',()=>{if(ctx){pause();ctx.close().catch(()=>{})}});
-})();
+  // Quote card
+  const quote=quotes[new Date().getDate()%quotes.length];$("#dailyQuote").textContent=quote[0];$("#quoteAuthor").textContent=`— ${quote[1]}`;
 
-// Mood-based YouTube search and optional in-page video/playlist embedding.
-(()=>{
- const searchForm=$('ytSearchForm'),searchInput=$('ytSearch'),urlInput=$('ytUrl'),loadButton=$('ytLoad'),wrap=$('ytPlayerWrap'),frame=$('ytPlayerFrame'),title=$('ytPlayerTitle'),openLink=$('ytOpenLink'),status=$('ytStatus');
- if(!searchForm||!searchInput||!urlInput||!loadButton||!wrap||!frame)return;
- const moodQueries={
-  phonk:'phonk playlist drift phonk bass',
-  slowed:'slowed reverb playlist phonk',
-  motivation:'motivational phonk gym playlist',
-  focus:'gaming phonk focus playlist'
- };
- let activeMood='phonk';
- function youtubeSearch(query){const q=String(query||'').trim();if(!q){status.textContent='Type a song or playlist name first.';searchInput.focus();return}window.open('https://www.youtube.com/results?search_query='+encodeURIComponent(q),'_blank','noopener,noreferrer');status.textContent='YouTube search opened for: '+q;}
- document.querySelectorAll('[data-yt-mood]').forEach(button=>button.addEventListener('click',()=>{
-  activeMood=button.dataset.ytMood||'phonk';
-  document.querySelectorAll('[data-yt-mood]').forEach(other=>{const selected=other===button;other.classList.toggle('selected',selected);other.setAttribute('aria-pressed',String(selected))});
-  searchInput.value=moodQueries[activeMood]||moodQueries.phonk;
-  status.textContent='Mood selected. Press “Search YouTube” to choose a track or playlist.';
- }));
- searchInput.value=moodQueries[activeMood];
- searchForm.addEventListener('submit',event=>{event.preventDefault();youtubeSearch(searchInput.value)});
- function parseYouTubeUrl(raw){
-  let url;try{url=new URL(String(raw||'').trim())}catch{return null}
-  const host=url.hostname.toLowerCase().replace(/^www\./,'').replace(/^m\./,'');
-  if(!['youtube.com','music.youtube.com','youtu.be','youtube-nocookie.com'].includes(host))return null;
-  const videoId=host==='youtu.be'?url.pathname.split('/').filter(Boolean)[0]:(url.searchParams.get('v')||url.pathname.match(/\/(?:embed|shorts|live)\/([^/?]+)/)?.[1]);
-  const listId=url.searchParams.get('list');
-  const validId=id=>typeof id==='string'&&/^[a-zA-Z0-9_-]{10,80}$/.test(id);
-  if(videoId&&validId(videoId)){const playlistSuffix=listId&&validId(listId)?'&list='+encodeURIComponent(listId):'';return {src:'https://www.youtube-nocookie.com/embed/'+encodeURIComponent(videoId)+'?autoplay=0&playsinline=1&rel=0'+playlistSuffix,title:playlistSuffix?'YouTube video + playlist':'YouTube video',open:url.href};}
-  if(listId&&validId(listId))return {src:'https://www.youtube-nocookie.com/embed/videoseries?list='+encodeURIComponent(listId)+'&autoplay=0&playsinline=1&rel=0',title:'YouTube playlist',open:url.href};
-  return null;
- }
- function loadYouTube(){
-  const raw=urlInput.value.trim(),parsed=parseYouTubeUrl(raw);
-  if(!parsed){status.textContent='Please paste a valid YouTube video or playlist URL.';urlInput.focus();return}
-  frame.replaceChildren();const iframe=document.createElement('iframe');iframe.src=parsed.src;iframe.title='YouTube music player';iframe.loading='lazy';iframe.allow='encrypted-media; picture-in-picture; web-share';iframe.referrerPolicy='strict-origin-when-cross-origin';iframe.allowFullscreen=true;frame.appendChild(iframe);
-  title.textContent=parsed.title;openLink.href=parsed.open;wrap.hidden=false;status.textContent='Player ready. Press Play inside the YouTube player when you are ready.';
- }
- const FAVORITES_KEY='lifeResetMusicFavoritesV1';
- const favoritesBox=$('ytFavorites'),saveFavoriteButton=$('ytSaveFavorite'),miniJump=$('miniMusicJump'),miniLabel=$('miniMusicLabel');
- function readFavorites(){try{const value=JSON.parse(localStorage.getItem(FAVORITES_KEY)||'[]');return Array.isArray(value)?value.filter(x=>x&&typeof x.url==='string'&&typeof x.name==='string').slice(0,30):[]}catch{return []}}
- function renderFavorites(){if(!favoritesBox)return;const favorites=readFavorites();favoritesBox.replaceChildren();if(!favorites.length){const note=document.createElement('p');note.className='music-note';note.textContent='No favorites saved yet — load a song, then tap Save current link.';favoritesBox.appendChild(note);return}favorites.forEach((item,index)=>{const row=document.createElement('div');row.className='yt-favorite-row';const play=document.createElement('button');play.type='button';play.className='yt-favorite-play';play.textContent='▶ '+item.name;play.title=item.url;play.addEventListener('click',()=>{urlInput.value=item.url;loadYouTube();$('music').scrollIntoView({behavior:'smooth',block:'start'})});const remove=document.createElement('button');remove.type='button';remove.className='yt-favorite-remove';remove.textContent='×';remove.setAttribute('aria-label','Remove '+item.name);remove.addEventListener('click',()=>{const next=readFavorites();next.splice(index,1);try{localStorage.setItem(FAVORITES_KEY,JSON.stringify(next));renderFavorites()}catch{status.textContent='Could not update favorites in browser storage.'}});row.append(play,remove);favoritesBox.appendChild(row)})}
- const favoriteModal=$('favoriteModal'),favoriteForm=$('favoriteForm'),favoriteName=$('favoriteName');
- let pendingFavorite=null,previousFocus=null;
- function closeFavoriteModal(){if(!favoriteModal)return;favoriteModal.hidden=true;pendingFavorite=null;if(previousFocus?.isConnected)previousFocus.focus()}
- function openFavoriteModal(parsed){pendingFavorite=parsed;previousFocus=document.activeElement;favoriteName.value=parsed.title==='YouTube playlist'?'My YouTube playlist':'My favorite track';favoriteModal.hidden=false;requestAnimationFrame(()=>{favoriteName.focus();favoriteName.select()})}
- saveFavoriteButton?.addEventListener('click',()=>{const raw=urlInput.value.trim(),parsed=parseYouTubeUrl(raw);if(!parsed){status.textContent='Load a valid YouTube link first, then save it.';urlInput.focus();return}const favorites=readFavorites();if(favorites.some(x=>x.url===parsed.open)){status.textContent='That link is already in your favorites.';return}if(favorites.length>=30){status.textContent='Favorites are full (30 max). Remove one before adding another.';return}openFavoriteModal(parsed)});
- favoriteForm?.addEventListener('submit',event=>{event.preventDefault();if(!pendingFavorite)return;const favorites=readFavorites();if(favorites.some(x=>x.url===pendingFavorite.open)){status.textContent='That link is already in your favorites.';closeFavoriteModal();return}if(favorites.length>=30){status.textContent='Favorites are full (30 max). Remove one before adding another.';closeFavoriteModal();return}const clean=favoriteName.value.trim().slice(0,70);if(!clean){favoriteName.focus();return}favorites.unshift({url:pendingFavorite.open,name:clean});try{localStorage.setItem(FAVORITES_KEY,JSON.stringify(favorites));renderFavorites();status.textContent='Favorite saved on this browser ✓';closeFavoriteModal()}catch{status.textContent='Browser storage unavailable; favorite was not saved.'}});
- $('favoriteModalClose')?.addEventListener('click',closeFavoriteModal);$('favoriteCancel')?.addEventListener('click',closeFavoriteModal);favoriteModal?.addEventListener('click',event=>{if(event.target===favoriteModal)closeFavoriteModal()});document.addEventListener('keydown',event=>{if(!favoriteModal?.hidden&&event.key==='Escape')closeFavoriteModal()});
- function showMiniJump(name){if(!miniJump)return;miniLabel.textContent=name||'Music loaded';miniJump.hidden=false}
- miniJump?.addEventListener('click',()=>{$('music').scrollIntoView({behavior:'smooth',block:'start'});wrap.hidden=false});
- loadButton.addEventListener('click',loadYouTube);
- urlInput.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();loadYouTube()}});
- $('ytClear')?.addEventListener('click',()=>{frame.replaceChildren();wrap.hidden=true;if(miniJump)miniJump.hidden=true;status.textContent='Player closed. Choose another mood or song.'});
- const originalLoadYouTube=loadYouTube;
- loadYouTube=function(){originalLoadYouTube();if(!wrap.hidden){showMiniJump(title.textContent)}};
- renderFavorites();
+  // YouTube player and saved favorites
+  const ytMoods={phonk:"phonk drift music",slowed:"slowed reverb anime music",motivation:"gym motivation music",focus:"gaming focus music"};
+  function videoIdFromUrl(url){
+    try{
+      const u=new URL(url);
+      if(u.hostname.includes("youtu.be"))return u.pathname.split("/").filter(Boolean)[0]||null;
+      if(u.hostname.includes("youtube.com")||u.hostname.includes("youtube-nocookie.com")){
+        if(u.searchParams.get("v"))return u.searchParams.get("v");
+        const parts=u.pathname.split("/").filter(Boolean);
+        if(["embed","shorts","live"].includes(parts[0]))return parts[1]||null;
+      }
+    }catch{}
+    return null;
+  }
+  function loadYoutube(url,title="Selected YouTube track"){
+    let u;try{u=new URL(url);}catch{toast("Paste a valid YouTube link.");return;}
+    const allowed=["youtube.com","www.youtube.com","m.youtube.com","music.youtube.com","youtu.be","www.youtu.be","youtube-nocookie.com","www.youtube-nocookie.com"];
+    if(!allowed.includes(u.hostname)){toast("Please use a YouTube link.");return;}
+    const id=videoIdFromUrl(url), playlist=u.searchParams.get("list");
+    if(!id&&!playlist){toast("That link doesn't include a video or playlist ID.");return;}
+    const embed=id?`https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}${playlist?`?list=${encodeURIComponent(playlist)}`:""}`:`https://www.youtube-nocookie.com/embed/videoseries?list=${encodeURIComponent(playlist)}`;
+    $("#ytPlayerFrame").innerHTML="";
+    const frame=document.createElement("iframe");frame.src=embed;frame.title="YouTube music player";frame.allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";frame.allowFullscreen=true;frame.referrerPolicy="strict-origin-when-cross-origin";
+    $("#ytPlayerFrame").append(frame);$("#ytPlayerWrap").hidden=false;$("#ytPlayerTitle").textContent=title;$("#ytOpenLink").href=url;
+    currentYt={url,title};$("#ytStatus").textContent="Player loaded. Press play inside the player when you're ready.";
+    $("#miniMusicJump").hidden=false;$("#miniMusicLabel").textContent=title;$("#miniMusicJump").setAttribute("aria-label",`Jump to ${title}`);
+  }
+  $("#ytSearchForm").addEventListener("submit",e=>{
+    e.preventDefault();const q=$("#ytSearch").value.trim()||ytMoods[$(".yt-mood.selected")?.dataset.ytMood||"phonk"];
+    window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`,"_blank","noopener");$("#ytStatus").textContent=`YouTube search opened for “${q}”. Paste a video link to play it here.`;
+  });
+  $$(".yt-mood").forEach(b=>b.addEventListener("click",()=>{$$(".yt-mood").forEach(x=>{x.classList.toggle("selected",x===b);x.setAttribute("aria-pressed",String(x===b));});$("#ytSearch").value=ytMoods[b.dataset.ytMood]||"";}));
+  $("#ytLoad").addEventListener("click",()=>loadYoutube($("#ytUrl").value.trim()));
+  $("#ytUrl").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();loadYoutube(e.target.value.trim());}});
+  $("#ytClear").addEventListener("click",()=>{$("#ytPlayerFrame").innerHTML="";$("#ytPlayerWrap").hidden=true;currentYt=null;$("#miniMusicJump").hidden=true;});
+  $("#miniMusicJump").addEventListener("click",()=>$("#music").scrollIntoView({behavior:"smooth",block:"start"}));
+  $("#ytSaveFavorite").addEventListener("click",()=>{
+    if(!currentYt){const url=$("#ytUrl").value.trim();if(url){const id=videoIdFromUrl(url);if(id||url.includes("list="))currentYt={url,title:"YouTube favorite"};} }
+    if(!currentYt){toast("Load a YouTube video or playlist first.");return;}
+    pendingFavoriteUrl=currentYt.url;pendingFavoriteTitle=currentYt.title||"YouTube favorite";
+    $("#favoriteName").value=pendingFavoriteTitle;$("#favoriteModal").hidden=false;$("#favoriteName").focus();
+  });
+  function closeFavoriteModal(){$("#favoriteModal").hidden=true;pendingFavoriteUrl="";pendingFavoriteTitle="";}
+  $("#favoriteModalClose").addEventListener("click",closeFavoriteModal);$("#favoriteCancel").addEventListener("click",closeFavoriteModal);
+  $("#favoriteModal").addEventListener("click",e=>{if(e.target===$("#favoriteModal"))closeFavoriteModal();});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#favoriteModal").hidden)closeFavoriteModal();});
+  $("#favoriteForm").addEventListener("submit",e=>{
+    e.preventDefault();const name=$("#favoriteName").value.trim();if(!name||!pendingFavoriteUrl)return;
+    data.musicFavorites=data.musicFavorites||[];if(!data.musicFavorites.some(f=>f.url===pendingFavoriteUrl)){data.musicFavorites.unshift({id:makeId(),name:name.slice(0,70),url:pendingFavoriteUrl});}
+    else data.musicFavorites=data.musicFavorites.map(f=>f.url===pendingFavoriteUrl?{...f,name:name.slice(0,70)}:f);
+    save();renderFavorites();closeFavoriteModal();toast("Favorite saved.");
+  });
+  function renderFavorites(){
+    const box=$("#ytFavorites");box.innerHTML="";
+    (data.musicFavorites||[]).forEach(f=>{
+      const row=document.createElement("div");row.className="yt-favorite-row";
+      const play=document.createElement("button");play.type="button";play.className="yt-favorite-play";play.textContent=`♫ ${f.name}`;play.title=f.name;play.addEventListener("click",()=>{loadYoutube(f.url,f.name);$("#music").scrollIntoView({behavior:"smooth",block:"start"});});
+      const remove=document.createElement("button");remove.type="button";remove.className="yt-favorite-remove";remove.textContent="×";remove.setAttribute("aria-label",`Remove ${f.name}`);remove.addEventListener("click",()=>{data.musicFavorites=data.musicFavorites.filter(x=>x.id!==f.id);save();renderFavorites();});
+      row.append(play,remove);box.append(row);
+    });
+  }
+  renderFavorites();
+
+  // Web Audio soundscapes — starts only after an explicit user action.
+  const moods={
+    lofi:{name:"Lo-fi flow",freq:220,interval:2.7,type:"sine"},
+    rain:{name:"Rainy focus",freq:165,interval:3.4,type:"triangle"},
+    cinematic:{name:"Epic drive",freq:110,interval:1.8,type:"sawtooth"},
+    nature:{name:"Calm nature",freq:261.6,interval:4.1,type:"sine"}
+  };
+  let selectedMood="lofi", volume=.35;
+  function stopAudio(){
+    clearInterval(audioTimer);audioTimer=null;audioNodes.forEach(n=>{try{n.stop?.();n.disconnect?.();}catch{}});audioNodes=[];
+    musicPlaying=false;$(".music-panel").classList.remove("is-playing");$("#musicToggle").textContent="▶ Play soundscape";$("#musicToggle").setAttribute("aria-pressed","false");$("#musicStatus").textContent="Paused";
+  }
+  function playAudio(){
+    const AC=window.AudioContext||window.webkitAudioContext;if(!AC){toast("Your browser does not support generated audio.");return;}
+    if(!audioContext)audioContext=new AC();audioContext.resume();
+    stopAudio();musicPlaying=true;$(".music-panel").classList.add("is-playing");$("#musicToggle").textContent="Ⅱ Pause soundscape";$("#musicToggle").setAttribute("aria-pressed","true");$("#musicStatus").textContent="Playing · generated locally";
+    const mood=moods[selectedMood];
+    const createTone=(freq,type="sine",gain=.035)=>{
+      const osc=audioContext.createOscillator(),g=audioContext.createGain();
+      osc.type=type;osc.frequency.value=freq;g.gain.value=gain*volume;osc.connect(g);g.connect(audioContext.destination);osc.start();audioNodes.push(osc,g);
+    };
+    createTone(mood.freq,mood.type,.035);createTone(mood.freq*1.5,"sine",.012);
+    audioTimer=setInterval(()=>{if(!musicPlaying)return;const osc=audioContext.createOscillator(),g=audioContext.createGain();osc.type="sine";osc.frequency.value=mood.freq*(1+Math.floor(Math.random()*5)/8);g.gain.setValueAtTime(.0001,audioContext.currentTime);g.gain.exponentialRampToValueAtTime(Math.max(.0002,.012*volume),audioContext.currentTime+.08);g.gain.exponentialRampToValueAtTime(.0001,audioContext.currentTime+1.5);osc.connect(g);g.connect(audioContext.destination);osc.start();osc.stop(audioContext.currentTime+1.6);audioNodes.push(osc,g);},mood.interval*1000);
+  }
+  $$(".mood-button").forEach(b=>b.addEventListener("click",()=>{$$(".mood-button").forEach(x=>{x.classList.toggle("selected",x===b);x.setAttribute("aria-pressed",String(x===b));});selectedMood=b.dataset.mood;$("#musicTrackName").textContent=moods[selectedMood].name;if(musicPlaying)playAudio();else $("#musicStatus").textContent="Ready when you are";}));
+  $("#musicToggle").addEventListener("click",()=>musicPlaying?stopAudio():playAudio());
+  $("#musicVolume").addEventListener("input",e=>{volume=Number(e.target.value)/100;$("#musicVolumeValue").textContent=`${e.target.value}%`;if(musicPlaying)playAudio();});
+
+  // Anime Physique: character reference is fixed; only training variables adapt.
+  const physiqueProfiles={
+    garou:{name:"Garou",chip:"ATHLETIC BUILD",desc:"A lean, athletic reference emphasizing movement quality, relative strength and conditioning.",focus:["Shoulders & back","Core stability","Leg strength","Conditioning"],bias:"athletic"},
+    saitama:{name:"Saitama",chip:"BODYWEIGHT BASE",desc:"A simple, repeatable fitness reference centered on basic strength, steady conditioning and consistency.",focus:["Push strength","Leg endurance","Core control","Cardio base"],bias:"bodyweight"},
+    goku:{name:"Goku",chip:"BALANCED POWER",desc:"A muscular, balanced reference emphasizing progressive strength, full-body training and recovery.",focus:["Chest & back","Shoulders & arms","Leg strength","Core & conditioning"],bias:"power"}
+  };
+  let physiqueData=safeParse(localStorage.getItem(PHYSIQUE_STORE),{character:"garou",experience:"beginner",equipment:"home",days:4,duration:30,history:[]});
+  if(!physiqueData.history)physiqueData.history=[];
+  function savePhysique(){localStorage.setItem(PHYSIQUE_STORE,JSON.stringify(physiqueData));}
+  function setText(id,text){const el=$("#"+id);if(el)el.textContent=text;}
+  function workoutTemplate(character,equipment,experience,duration){
+    const profiles={
+      garou:[
+        ["Day 1 · Upper body","Push-ups, backpack rows, pike push-ups, plank"],
+        ["Day 2 · Lower body","Squats, reverse lunges, glute bridges, calf raises"],
+        ["Day 3 · Conditioning","Brisk intervals, mountain climbers, dead bugs"],
+        ["Day 4 · Full body","Incline push-ups, rows, split squats, side plank"],
+        ["Day 5 · Optional mobility","Easy walk, hip mobility, shoulder mobility"]
+      ],
+      saitama:[
+        ["Day 1 · Strength A","Squats, incline push-ups, glute bridges, dead bugs"],
+        ["Day 2 · Cardio + mobility","Brisk walk, step-ups, gentle full-body mobility"],
+        ["Day 3 · Strength B","Reverse lunges, wall/incline push-ups, bird dogs"],
+        ["Day 4 · Easy conditioning","Walk or cycle at a pace where you can talk"],
+        ["Day 5 · Optional full body","Squats, push-ups variation, calf raises, plank"]
+      ],
+      goku:[
+        ["Day 1 · Upper body","Push-ups or bench press, rows, shoulder press, curls"],
+        ["Day 2 · Lower body","Squat variation, hip hinge, lunges, calf raises"],
+        ["Day 3 · Recovery","Easy walk, mobility, relaxed stretching"],
+        ["Day 4 · Upper + core","Incline press, pulldown/rows, lateral raises, plank"],
+        ["Day 5 · Full body","Squat, row, push movement, carry or dead bug"]
+      ]
+    };
+    let list=profiles[character].slice();
+    const n=Number(physiqueData.days)||4;
+    if(n===3) list=[list[0],list[1],list[3]];
+    if(n===4) list=list.slice(0,4);
+    if(n===5) list=list.slice(0,5);
+    const difficulty={beginner:"2 sets · controlled pace",intermediate:"3 sets · steady pace",advanced:"3–4 sets · challenging but clean reps"}[experience];
+    const equipmentText=equipment==="home"?"Home / no equipment":equipment==="basic"?"Basic equipment": "Gym variations";
+    return list.map((item,i)=>{
+      let exercises=item[1];
+      if(equipment==="home")exercises=exercises.replace(/bench press/g,"push-up variation").replace(/shoulder press/g,"pike push-up").replace(/pulldown\/rows/g,"backpack rows").replace(/rows/g,"backpack rows").replace(/cycle/g,"walk");
+      if(equipment==="basic")exercises=exercises.replace(/backpack rows/g,"dumbbell or band rows").replace(/push-ups or bench press/g,"push-ups or dumbbell press").replace(/pulldown\/rows/g,"band pulldowns or rows");
+      if(equipment==="gym")exercises=exercises.replace(/backpack rows/g,"cable or machine rows").replace(/push-ups or bench press/g,"bench press or push-ups").replace(/hip hinge/g,"Romanian deadlift");
+      let sets=duration==="20"?"2 sets · short rests":duration==="45"?"3 sets · 60–90 sec rest":duration==="60"?"3–4 sets · 60–120 sec rest":difficulty;
+      if(experience==="beginner")sets=duration==="20"?"1–2 sets · comfortable pace":`2 sets · 60–90 sec rest`;
+      return {title:item[0],exercises,meta:`${sets} · ${equipmentText}`};
+    });
+  }
+  function renderPhysique(){
+    const profile=physiqueProfiles[physiqueData.character]||physiqueProfiles.garou;
+    $$(".physique-character").forEach(b=>{const on=b.dataset.character===physiqueData.character;b.classList.toggle("selected",on);b.setAttribute("aria-pressed",String(on));});
+    setText("physiqueLevelChip",profile.chip);setText("physiqueCharacterName",profile.name);setText("physiqueDescription",profile.desc);
+    const focus=$("#physiqueFocusList");focus.innerHTML="";profile.focus.forEach(t=>{const s=document.createElement("span");s.textContent=t;focus.append(s);});
+    setText("physiqueScheduleTag",`${physiqueData.days} DAYS`);
+    const workout=$("#physiqueWorkout");workout.innerHTML="";
+    workoutTemplate(physiqueData.character,physiqueData.equipment,physiqueData.experience,String(physiqueData.duration)).forEach(day=>{
+      const el=document.createElement("div");el.className="workout-day";
+      const top=document.createElement("div");top.className="workout-day-top";const b=document.createElement("b");b.textContent=day.title;const small=document.createElement("small");small.textContent="PLAN";top.append(b,small);
+      const p=document.createElement("p");p.textContent=`${day.exercises}. ${day.meta}. Warm up for 5 minutes and stop with a few good reps left.`;
+      el.append(top,p);workout.append(el);
+    });
+    const meals=[
+      ["🌅","Breakfast","Idli or dosa with sambar; or oats/poha plus curd, milk or eggs if you eat them."],
+      ["🍱","Lunch","Rice or roti, dal/rajma/chole, vegetables and curd or another protein source."],
+      ["🥜","Snack","Banana, roasted chana, peanuts, milk/curd or seasonal fruit."],
+      ["🌙","Dinner","Roti or rice with dal/paneer/soy/tofu/eggs/chicken (as preferred) and vegetables."]
+    ];
+    const diet=$("#physiqueDiet");diet.innerHTML="";
+    meals.forEach(m=>{const row=document.createElement("div");row.className="diet-row";const icon=document.createElement("span");icon.className="diet-icon";icon.textContent=m[0];const body=document.createElement("div");const b=document.createElement("b");b.textContent=m[1];const p=document.createElement("p");p.textContent=m[2];body.append(b,p);row.append(icon,body);diet.append(row);});
+    const history=physiqueData.history||[], weekAgo=Date.now()-7*86400000;
+    setText("physiqueWorkoutCount",history.length);setText("physiqueWeekCount",history.filter(x=>new Date(x.date).getTime()>=weekAgo).length);
+    setText("physiqueProgressTag",`${history.length} WORKOUT${history.length===1?"":"S"}`);
+    setText("physiqueConsistency",history.length?`${Math.min(100,Math.round(history.length/12*100))}% to 12-session milestone`:"Start today");
+    const box=$("#physiqueHistory");box.innerHTML="";
+    history.slice(0,6).forEach(item=>{const row=document.createElement("div");row.className="physique-history-row";const left=document.createElement("b");left.textContent=item.type;const right=document.createElement("span");right.textContent=`${dateLabel(new Date(item.date))} · ${item.effort}`;row.append(left,right);box.append(row);});
+    if(!history.length){const p=document.createElement("p");p.className="physique-diet-note";p.textContent="Your first logged session will appear here. Start with a comfortable level and build gradually.";box.append(p);}
+  }
+  function loadPhysique(){
+    $("#physiqueExperience").value=physiqueData.experience||"beginner";$("#physiqueEquipment").value=physiqueData.equipment||"home";
+    $("#physiqueDays").value=String(physiqueData.days||4);$("#physiqueDuration").value=String(physiqueData.duration||30);renderPhysique();
+  }
+  $$(".physique-character").forEach(b=>b.addEventListener("click",()=>{physiqueData.character=b.dataset.character;savePhysique();renderPhysique();}));
+  $("#generatePhysiquePlan").addEventListener("click",()=>{
+    physiqueData.experience=$("#physiqueExperience").value;physiqueData.equipment=$("#physiqueEquipment").value;
+    physiqueData.days=Number($("#physiqueDays").value);physiqueData.duration=Number($("#physiqueDuration").value);
+    savePhysique();renderPhysique();toast("Your training plan has been updated.");
+  });
+  $("#logPhysiqueWorkout").addEventListener("click",()=>{
+    physiqueData.history.unshift({id:makeId(),date:new Date().toISOString(),character:physiqueData.character,type:$("#physiqueWorkoutType").value,effort:$("#physiqueEffort").value});
+    physiqueData.history=physiqueData.history.slice(0,100);savePhysique();renderPhysique();toast("Workout logged. Consistency wins.");
+  });
+  loadPhysique();
+
+  snapshotDay();renderAll();save();
 })();

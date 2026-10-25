@@ -153,3 +153,36 @@ body.mint .primary{background:linear-gradient(110deg,#17a994,#35cbb5 55%,#6ce4f3
 @keyframes favoriteModalIn{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:480px){.favorite-modal{width:100%;padding:24px 20px;border-radius:18px}.favorite-modal h3{font-size:23px}.favorite-modal-actions{flex-direction:row}.favorite-modal-actions button{width:auto;flex:1;min-width:0}}
 @media(prefers-reduced-motion:reduce){.favorite-modal{animation:none}}
+
+
+/* Anime Physique — premium blueprint and realistic plan */
+.physique-panel{margin-top:16px}
+.physique-notice{padding:12px 14px;border:1px solid #e5b45a35;border-radius:12px;background:#d9a4410b;color:#c6c9df;font-size:11px;line-height:1.65}
+.physique-character-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:17px 0}
+.physique-character{display:flex;align-items:center;gap:11px;min-width:0;text-align:left;padding:13px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#12182b,#0d1222);color:var(--text);cursor:pointer;transition:.2s}
+.physique-character:hover,.physique-character.selected{border-color:#8a88ff9c;background:linear-gradient(145deg,#777cff20,#6ce4f30a);box-shadow:0 0 22px #777cff10}
+.character-mark{display:grid;place-items:center;width:43px;height:43px;flex-shrink:0;border-radius:13px;background:linear-gradient(145deg,#667bff44,#a178ff22);border:1px solid #8588ff44;font-size:21px;color:#dfe2ff}
+.character-copy{display:grid;gap:5px;min-width:0}.character-copy b{font-size:13px}.character-copy small{font-size:9px;letter-spacing:0;color:var(--muted);font-weight:500;line-height:1.4}.character-arrow{margin-left:auto;color:var(--cyan);font-size:17px}
+.physique-overview{display:grid;grid-template-columns:1.1fr .9fr;gap:13px}
+.physique-blueprint{position:relative;overflow:hidden;min-width:0;padding:22px;border:1px solid #8588ff3d;border-radius:17px;background:radial-gradient(ellipse at 100% 0%,#777cff22,transparent 48%),linear-gradient(145deg,#151b33,#0b1020)}
+.blueprint-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.blueprint-kicker,.physique-settings-heading small{font-size:9px;letter-spacing:1.4px;color:var(--cyan);font-weight:800}
+.blueprint-chip{padding:6px 8px;border:1px solid #8a88ff4a;border-radius:7px;color:#c9c8ff;font-size:8px;letter-spacing:.8px}
+.physique-blueprint h3{font-size:clamp(28px,3vw,40px);letter-spacing:-1.5px;margin:20px 0 8px}.physique-blueprint p{max-width:42ch;color:var(--muted);font-size:12px;line-height:1.7}
+.physique-focus-list{display:flex;gap:7px;flex-wrap:wrap;margin-top:17px}.physique-focus-list span{padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:#ffffff06;color:#cbd0ee;font-size:10px}
+.blueprint-foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:25px;padding-top:13px;border-top:1px solid var(--line);font-size:9px;color:var(--muted)}.blueprint-foot b{color:#b8c2ff;font-weight:600}
+.physique-settings{display:grid;gap:11px;align-content:start;padding:20px;border:1px solid var(--line);border-radius:17px;background:#0c1121}.physique-settings-heading{display:grid;gap:7px;margin-bottom:3px}.physique-settings-heading b{font-size:17px}
+.physique-field{display:grid;gap:7px;color:var(--muted);font-size:10px;letter-spacing:.3px;min-width:0}.physique-field select{width:100%;min-width:0;background:#11172a;border:1px solid #303653;border-radius:10px;padding:11px;color:var(--text);font:inherit;font-size:11px;outline:none}.physique-field select:focus{border-color:var(--accent)}
+.physique-settings>.primary{margin-top:3px;cursor:pointer}
+.physique-plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:14px}
+.physique-subpanel{min-width:0;padding:19px;border:1px solid var(--line);border-radius:16px;background:#0d1223}.physique-subpanel .heading h3,.physique-progress .heading h3{font-size:19px;letter-spacing:-.4px;margin:7px 0 0}
+.physique-workout,.physique-diet{display:grid;gap:8px;margin-top:15px}
+.workout-day,.diet-row{padding:12px;border:1px solid #ffffff12;border-radius:11px;background:#ffffff04}.workout-day-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.workout-day b,.diet-row b{font-size:11px}.workout-day small{font-size:9px;color:var(--cyan);letter-spacing:.5px}.workout-day p,.diet-row p{font-size:11px;line-height:1.7;color:var(--muted);margin:8px 0 0}.diet-row{display:grid;grid-template-columns:35px 1fr;gap:10px;align-items:start}.diet-icon{display:grid;place-items:center;width:33px;height:33px;border:1px solid #6ce4f32a;border-radius:10px;background:#6ce4f30b;font-size:17px}
+.physique-diet-note{font-size:11px;line-height:1.65;color:var(--muted);margin:13px 0 0}
+.physique-progress{margin-top:14px;padding:20px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,#12182b,#0b1020)}
+.physique-progress-form{display:grid;grid-template-columns:1fr 1fr auto;align-items:end;gap:10px;margin-top:16px}
+.physique-progress-form .primary{white-space:nowrap;cursor:pointer}
+.physique-progress-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}
+.physique-progress-stats>div{display:grid;gap:8px;padding:13px;border:1px solid var(--line);border-radius:11px;background:#ffffff04}.physique-progress-stats small{font-size:8px;letter-spacing:1px;color:var(--muted)}.physique-progress-stats b{font-size:20px;color:#dfe2ff}
+.physique-history{display:grid;gap:7px;margin-top:13px}.physique-history-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:10px}.physique-history-row span{color:var(--muted)}.physique-disclaimer{font-size:10px;line-height:1.7;color:#8f98b7;margin:15px 0 0}
+@media(max-width:900px){.physique-overview,.physique-plan-grid{grid-template-columns:1fr}.physique-character-grid{grid-template-columns:1fr}.physique-character{padding:11px}.physique-progress-form{grid-template-columns:1fr 1fr}.physique-progress-form .primary{grid-column:1/-1}}
+@media(max-width:520px){.physique-panel{padding:15px}.physique-blueprint,.physique-settings,.physique-subpanel,.physique-progress{padding:15px}.physique-progress-form{grid-template-columns:1fr}.physique-progress-form .primary{grid-column:auto;width:100%}.physique-progress-stats{gap:6px}.physique-progress-stats>div{padding:10px}.physique-progress-stats small{font-size:7px}.physique-progress-stats b{font-size:17px}.blueprint-foot{flex-direction:column}.physique-character-grid{gap:7px}}
