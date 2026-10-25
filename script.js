@@ -31,14 +31,80 @@
   function saveRPG(){ try { localStorage.setItem(RPG_STORE, JSON.stringify(rpgData)); } catch(e){ console.warn("Could not save RPG progress",e); } }
   function awardXP(key, amount, label){
     if (rpgData.ledger[key]) return false;
+    const oldLevel = rpgLevel();
     rpgData.ledger[key] = {amount, label, at:new Date().toISOString()};
     rpgData.xp += amount;
     saveRPG();
     renderRPG();
-    toast(`+${amount} XP · ${label}`);
+    if (rpgLevel() > oldLevel) {
+      const panel = document.getElementById("rpgProgress");
+      if (panel) {
+        panel.classList.remove("rpg-level-up");
+        void panel.offsetWidth;
+        panel.classList.add("rpg-level-up");
+        window.setTimeout(() => panel.classList.remove("rpg-level-up"), 1400);
+      }
+      toast(`LEVEL UP! · Level ${rpgLevel()} reached ✨`);
+    } else {
+      toast(`+${amount} XP · ${label}`);
+    }
     return true;
   }
   function rpgLevel(xp=rpgData.xp){ return Math.floor(Math.max(0,xp)/100)+1; }
+  function renderDailyQuests(){
+    const day = todayKey();
+    const entries = Object.entries(rpgData.ledger).filter(([key]) => key.startsWith(`${day}|`));
+    const countKind = kind => entries.filter(([key]) => key.includes(`|${kind}|`)).length;
+    const quests = [
+      {id:"tasks-two", icon:"✅", title:"Clear two tasks", detail:"Complete 2 separate tasks today.", kind:"task", target:2, reward:25},
+      {id:"habits-two", icon:"🌿", title:"Keep your habits", detail:"Complete 2 habit check-ins today.", kind:"habit", target:2, reward:20},
+      {id:"focus-one", icon:"🧠", title:"Deep focus", detail:"Finish one focus session today.", kind:"focus", target:1, reward:25},
+      {id:"workout-one", icon:"🥊", title:"Training arc", detail:"Log one workout today.", kind:"workout", target:1, reward:30}
+    ];
+    const list = document.getElementById("questList");
+    let completed = 0;
+    if (!list) return;
+    list.innerHTML = "";
+    quests.forEach(q => {
+      const progress = Math.min(q.target, countKind(q.kind));
+      const ready = progress >= q.target;
+      const claimedKey = `${day}|quest|${q.id}`;
+      const claimed = !!rpgData.ledger[claimedKey];
+      if (claimed) completed++;
+      const card = document.createElement("article");
+      card.className = "quest-card" + (claimed ? " quest-claimed" : ready ? " quest-ready" : "");
+      const top = document.createElement("div"); top.className = "quest-card-top";
+      const icon = document.createElement("span"); icon.className = "quest-icon"; icon.textContent = q.icon;
+      const copy = document.createElement("div"); copy.className = "quest-copy";
+      const title = document.createElement("b"); title.textContent = q.title;
+      const detail = document.createElement("p"); detail.textContent = claimed ? "Quest complete — reward collected!" : q.detail;
+      copy.append(title, detail);
+      const reward = document.createElement("span"); reward.className = "quest-reward"; reward.textContent = `+${q.reward} XP`;
+      top.append(icon, copy, reward);
+      const bottom = document.createElement("div"); bottom.className = "quest-progress-row";
+      const track = document.createElement("div"); track.className = "quest-track";
+      const fill = document.createElement("i"); fill.style.width = `${Math.round(progress/q.target*100)}%`; track.append(fill);
+      const progressText = document.createElement("small"); progressText.textContent = `${progress}/${q.target}`;
+      bottom.append(track, progressText);
+      card.append(top, bottom);
+      if (claimed) {
+        const status = document.createElement("span"); status.className = "quest-status"; status.textContent = "✓ CLAIMED"; card.append(status);
+      } else if (ready) {
+        const button = document.createElement("button"); button.type = "button"; button.className = "quest-claim"; button.textContent = "Claim reward";
+        button.addEventListener("click", () => {
+          if (awardXP(claimedKey, q.reward, `${q.title} quest reward`)) renderDailyQuests();
+        });
+        card.append(button);
+      } else {
+        const status = document.createElement("span"); status.className = "quest-status"; status.textContent = "IN PROGRESS"; card.append(status);
+      }
+      list.append(card);
+    });
+    const count = document.getElementById("questCompleteCount");
+    if (count) count.textContent = `${completed} / ${quests.length} claimed`;
+    const reset = document.getElementById("questResetLabel");
+    if (reset) reset.textContent = `DAILY · ${dateLabel()}`;
+  }
   function renderRPG(){
     const xp=Math.max(0,Number(rpgData.xp)||0), level=rpgLevel(xp), into=xp%100;
     const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
@@ -60,6 +126,7 @@
     const box=$("#rpgBadges");
     if(box){box.innerHTML="";badges.forEach(b=>{const el=document.createElement("div");el.className="rpg-badge"+(rpgData.unlocked.includes(b.id)?" unlocked":" locked");el.title=b.desc;el.innerHTML=`<span>${b.icon}</span><b>${b.name}</b><small>${rpgData.unlocked.includes(b.id)?"UNLOCKED":b.desc}</small>`;box.append(el);});}
     set("rpgMessage",into>=75?"Almost there — one more useful action!":into>=40?"Nice momentum. Keep stacking small wins.":"Your next level starts with one small win.");
+    renderDailyQuests();
   }
   let activeFilter = "all", searchTerm = "", prioritySort = false;
   let timerSeconds = 25 * 60, timerInterval = null, timerRunning = false;

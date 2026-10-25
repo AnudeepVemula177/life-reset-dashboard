@@ -18,6 +18,14 @@
   </div>
   <div class="rpg-achievements"><div class="rpg-ach-title"><small>UNLOCKED ACHIEVEMENTS</small><span id="rpgAchievementCount">0 / 5</span></div><div class="rpg-badges" id="rpgBadges"></div></div>
 </section>
+<section class="quest-panel" id="dailyQuests" aria-labelledby="questTitle">
+  <div class="quest-heading">
+    <div><small>DAILY MISSIONS</small><h2 id="questTitle">Today's Quests</h2><p>Small wins. Real progress. Bonus XP.</p></div>
+    <span class="quest-reset" id="questResetLabel">RESETS DAILY</span>
+  </div>
+  <div class="quest-list" id="questList" aria-live="polite"></div>
+  <div class="quest-footer"><span id="questCompleteCount">0 / 4 completed</span><span>Bonus XP is claimed once per quest each day.</span></div>
+</section>
 <section class="smartdash" aria-label="Weekly progress insights">
 <div class="panel weekpanel"><div class="heading"><div><small>YOUR CONSISTENCY</small><h2>This week</h2></div><span class="tag" id="weekSummary">0% average</span></div><p class="sub">A quick look at the effort you put in each day.</p><div class="weekchart" id="weekChart" aria-label="Daily progress chart"></div><div class="chartlegend"><span><i></i> Daily completion</span><span id="weekBest">Start with one small win today.</span></div></div>
 <div class="panel streakpanel"><div class="heading"><div><small>SHOW UP, EVERY DAY</small><h2>Consistency map</h2></div><span class="tag">7 DAYS</span></div><p class="sub">Your completed habits, saved day by day.</p><div class="streakcalendar" id="streakCalendar" aria-label="Last seven days of habit progress"></div><div class="calendarfoot"><span class="legenddot done-dot"></span> All habits complete <span class="legenddot some-dot"></span> Some progress <span class="legenddot empty-dot"></span> Not yet</div></div>
