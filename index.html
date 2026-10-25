@@ -5,6 +5,19 @@
 <main id="home"><header><div class="mobilebrand"><span class="logo mini">LR</span><b>LIFE RESET</b></div><div class="date"><small>YOUR PERSONAL COMMAND CENTER</small><b id="today">Today</b></div><div class="actions"><span class="status"><i></i> SYSTEM READY</span><button id="resetDayMobile" class="mobile-reset" type="button" title="Reset today’s task and habit checks">↻ Reset</button><button id="backupData" title="Export your progress">⇩ Backup</button><button id="theme" title="Change accent">✦</button></div></header>
 <section class="hero"><div><small class="cyan" id="welcomeLine">YOUR NEXT CHAPTER STARTS HERE</small><h1 id="heroTitle">Reset your day.<br><em>Rebuild your future.</em></h1><p id="heroSubtitle">Small steps. Real progress. One day at a time.</p><div class="heroactions"><a class="primary" href="#tasks">Plan my day ↗</a><a href="#focus" class="textlink">Start a focus session →</a></div></div><div class="orb"><div class="core">LR<span>+</span></div><i></i></div></section>
 <section class="stats"><article><small>TASKS COMPLETED</small><div class="number"><b id="done">0</b><span id="total">/ 3</span></div><p>Keep moving forward</p></article><article><small>DAILY PROGRESS</small><div class="number"><b id="percent">0</b><span>%</span></div><div class="track"><i id="bar"></i></div></article><article><small>FOCUS TIME TODAY</small><div class="number"><b id="minutes">0</b><span>min</span></div><p>Every minute counts</p></article><article><small>YOUR STREAK</small><div class="number"><b id="streak">0</b><span>days</span></div><p>Consistency, not pressure</p></article></section>
+<section class="rpg-panel" id="rpgProgress" aria-labelledby="rpgTitle">
+  <div class="rpg-main">
+    <div class="rpg-heading"><span class="rpg-emblem">✦</span><div><small>YOUR REAL-LIFE QUEST</small><h2 id="rpgTitle">Progression System</h2></div><span class="rpg-level" id="rpgLevel">LVL 1</span></div>
+    <div class="rpg-xp-row"><b><span id="rpgXP">0</span> XP</b><span id="rpgNext">100 XP to Level 2</span></div>
+    <div class="rpg-track"><i id="rpgBar"></i></div>
+    <p class="rpg-motivation" id="rpgMessage">Your next level starts with one small win.</p>
+  </div>
+  <div class="rpg-side">
+    <div class="rpg-mini-stat"><span>⚡</span><small>XP TODAY</small><b id="rpgTodayXP">0</b></div>
+    <div class="rpg-mini-stat"><span>🔥</span><small>ACTIVE STREAK</small><b id="rpgStreak">0 days</b></div>
+  </div>
+  <div class="rpg-achievements"><div class="rpg-ach-title"><small>UNLOCKED ACHIEVEMENTS</small><span id="rpgAchievementCount">0 / 5</span></div><div class="rpg-badges" id="rpgBadges"></div></div>
+</section>
 <section class="smartdash" aria-label="Weekly progress insights">
 <div class="panel weekpanel"><div class="heading"><div><small>YOUR CONSISTENCY</small><h2>This week</h2></div><span class="tag" id="weekSummary">0% average</span></div><p class="sub">A quick look at the effort you put in each day.</p><div class="weekchart" id="weekChart" aria-label="Daily progress chart"></div><div class="chartlegend"><span><i></i> Daily completion</span><span id="weekBest">Start with one small win today.</span></div></div>
 <div class="panel streakpanel"><div class="heading"><div><small>SHOW UP, EVERY DAY</small><h2>Consistency map</h2></div><span class="tag">7 DAYS</span></div><p class="sub">Your completed habits, saved day by day.</p><div class="streakcalendar" id="streakCalendar" aria-label="Last seven days of habit progress"></div><div class="calendarfoot"><span class="legenddot done-dot"></span> All habits complete <span class="legenddot some-dot"></span> Some progress <span class="legenddot empty-dot"></span> Not yet</div></div>

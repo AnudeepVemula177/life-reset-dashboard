@@ -5,6 +5,7 @@
   const $$ = (s, root = document) => [...root.querySelectorAll(s)];
   const STORE = "lifeResetDashboard_v3";
   const PHYSIQUE_STORE = "lifeResetPhysique_v1";
+  const RPG_STORE = "lifeResetRPG_v1";
   const todayKey = () => new Date().toLocaleDateString("en-CA");
   const dateLabel = (d = new Date()) => d.toLocaleDateString(undefined, {month:"short", day:"numeric"});
   const safeParse = (v, fallback) => { try { return v ? JSON.parse(v) : fallback; } catch { return fallback; } };
@@ -23,6 +24,43 @@
   if (!data.habits || typeof data.habits !== "object") data.habits = {};
   if (!data.daily || typeof data.daily !== "object") data.daily = {};
   if (!data.profile) data.profile = {name:"",goal:25};
+  let rpgData = safeParse(localStorage.getItem(RPG_STORE), {xp:0, ledger:{}, unlocked:[]});
+  if (!Number.isFinite(rpgData.xp)) rpgData.xp = 0;
+  if (!rpgData.ledger || typeof rpgData.ledger !== "object") rpgData.ledger = {};
+  if (!Array.isArray(rpgData.unlocked)) rpgData.unlocked = [];
+  function saveRPG(){ try { localStorage.setItem(RPG_STORE, JSON.stringify(rpgData)); } catch(e){ console.warn("Could not save RPG progress",e); } }
+  function awardXP(key, amount, label){
+    if (rpgData.ledger[key]) return false;
+    rpgData.ledger[key] = {amount, label, at:new Date().toISOString()};
+    rpgData.xp += amount;
+    saveRPG();
+    renderRPG();
+    toast(`+${amount} XP · ${label}`);
+    return true;
+  }
+  function rpgLevel(xp=rpgData.xp){ return Math.floor(Math.max(0,xp)/100)+1; }
+  function renderRPG(){
+    const xp=Math.max(0,Number(rpgData.xp)||0), level=rpgLevel(xp), into=xp%100;
+    const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
+    set("rpgLevel",`LVL ${level}`); set("rpgXP",xp);
+    set("rpgNext",`${100-into} XP to Level ${level+1}`);
+    const bar=$("#rpgBar"); if(bar)bar.style.width=`${into}%`;
+    const todayPrefix=`${todayKey()}|`;
+    const todayXP=Object.entries(rpgData.ledger).reduce((sum,[key,item])=>sum+(key.startsWith(todayPrefix)?Number(item.amount)||0:0),0);
+    set("rpgTodayXP",todayXP); set("rpgStreak",`${calculateStreak()} day${calculateStreak()===1?"":"s"}`);
+    const badges=[
+      {id:"first-task",icon:"🌱",name:"First Step",desc:"Complete your first task",ok:Object.keys(rpgData.ledger).some(k=>k.includes("|task|"))},
+      {id:"focus-five",icon:"⚡",name:"Focus Warrior",desc:"Finish 5 focus sessions",ok:Object.keys(rpgData.ledger).filter(k=>k.includes("|focus|")).length>=5},
+      {id:"first-workout",icon:"🥊",name:"Training Arc",desc:"Log your first workout",ok:Object.keys(rpgData.ledger).some(k=>k.includes("|workout|"))},
+      {id:"streak-seven",icon:"🔥",name:"Consistency",desc:"Reach a 7-day activity streak",ok:calculateStreak()>=7},
+      {id:"level-five",icon:"👑",name:"Level Up",desc:"Reach Level 5",ok:level>=5}
+    ];
+    badges.forEach(b=>{if(b.ok&&!rpgData.unlocked.includes(b.id)){rpgData.unlocked.push(b.id);saveRPG();}});
+    set("rpgAchievementCount",`${badges.filter(b=>rpgData.unlocked.includes(b.id)).length} / ${badges.length}`);
+    const box=$("#rpgBadges");
+    if(box){box.innerHTML="";badges.forEach(b=>{const el=document.createElement("div");el.className="rpg-badge"+(rpgData.unlocked.includes(b.id)?" unlocked":" locked");el.title=b.desc;el.innerHTML=`<span>${b.icon}</span><b>${b.name}</b><small>${rpgData.unlocked.includes(b.id)?"UNLOCKED":b.desc}</small>`;box.append(el);});}
+    set("rpgMessage",into>=75?"Almost there — one more useful action!":into>=40?"Nice momentum. Keep stacking small wins.":"Your next level starts with one small win.");
+  }
   let activeFilter = "all", searchTerm = "", prioritySort = false;
   let timerSeconds = 25 * 60, timerInterval = null, timerRunning = false;
   let audioContext = null, audioNodes = [], audioTimer = null, musicPlaying = false;
@@ -78,7 +116,7 @@
     tasks.forEach(task=>{
       const row=document.createElement("div"); row.className=`task ${task.done?"done":""} priority-${task.priority||"normal"}`; row.dataset.id=task.id;
       const check=document.createElement("button"); check.type="button"; check.className="check"; check.textContent="✓"; check.setAttribute("aria-label",task.done?"Mark task active":"Complete task");
-      check.addEventListener("click",()=>{task.done=!task.done; snapshotDay(); save(); renderAll();});
+      check.addEventListener("click",()=>{const wasDone=task.done;task.done=!task.done;if(!wasDone&&task.done)awardXP(`${todayKey()}|task|${task.id}`,10,"Task complete");snapshotDay();save();renderAll();});
       const txt=document.createElement("span"); txt.className="txt"; txt.textContent=task.text;
       const priority=document.createElement("span"); priority.className="priority-label"; priority.textContent=({high:"HIGH",normal:"NORMAL",low:"LOW"})[task.priority||"normal"];
       const edit=document.createElement("button"); edit.type="button"; edit.className="edit-task"; edit.textContent="Edit"; edit.setAttribute("aria-label","Edit task");
@@ -154,7 +192,7 @@
       cell.append(box,label,num);cal.append(cell);
     });
   }
-  function renderAll(){snapshotDay();renderTasks();renderHabits();renderStats();renderWeek();save();}
+  function renderAll(){snapshotDay();renderTasks();renderHabits();renderStats();renderWeek();renderRPG();save();}
   $("#taskForm").addEventListener("submit",e=>{
     e.preventDefault();const input=$("#taskInput"), text=input.value.trim();if(!text){input.focus();return;}
     data.tasks.push({id:makeId(),text:text.slice(0,90),done:false,priority:$("#taskPriority").value||"normal"});
@@ -164,7 +202,7 @@
   $$(".filter").forEach(b=>b.addEventListener("click",()=>{activeFilter=b.dataset.filter;renderTasks();}));
   $("#sortTasks").addEventListener("click",()=>{prioritySort=!prioritySort;$("#sortTasks").textContent=prioritySort?"↕ Natural order":"↕ Priority first";renderTasks();});
   $("#clearDone").addEventListener("click",()=>{data.tasks=data.tasks.filter(t=>!t.done);snapshotDay();save();renderAll();toast("Completed tasks cleared.");});
-  $$("[data-habit]").forEach(input=>input.addEventListener("change",()=>{currentDay().habits[input.dataset.habit]=input.checked;snapshotDay();save();renderAll();}));
+  $$("[data-habit]").forEach(input=>input.addEventListener("change",()=>{currentDay().habits[input.dataset.habit]=input.checked;if(input.checked)awardXP(`${todayKey()}|habit|${input.dataset.habit}`,15,"Habit complete");snapshotDay();save();renderAll();}));
   function resetDay(){currentDay().habits={};data.tasks.forEach(t=>t.done=false);snapshotDay();save();renderAll();toast("Today's checks reset.");}
   $("#resetDay").addEventListener("click",resetDay);$("#resetDayMobile").addEventListener("click",resetDay);
   $("#theme").addEventListener("click",()=>{document.body.classList.toggle("mint");data.theme=document.body.classList.contains("mint")?"mint":"violet";save();});
@@ -194,7 +232,7 @@
     timerRunning=true;$("#start").textContent="Ⅱ Pause";$("#timerStatus").textContent="FOCUS IN PROGRESS";
     timerInterval=setInterval(()=>{
       timerSeconds--;updateClock();
-      if(timerSeconds<=0){stopTimer();const mins=Number($(".presets button.selected")?.dataset.min||25);data.focusMinutes=(data.focusMinutes||0)+mins;currentDay().focusMinutes=(currentDay().focusMinutes||0)+mins;save();renderStats();toast(`Focus complete · ${mins} minutes logged.`);$("#timerStatus").textContent="SESSION COMPLETE";}
+      if(timerSeconds<=0){stopTimer();const mins=Number($(".presets button.selected")?.dataset.min||25);data.focusMinutes=(data.focusMinutes||0)+mins;currentDay().focusMinutes=(currentDay().focusMinutes||0)+mins;save();renderStats();awardXP(`${todayKey()}|focus|${makeId()}`,20,"Focus session complete");toast(`Focus complete · ${mins} minutes logged.`);$("#timerStatus").textContent="SESSION COMPLETE";}
     },1000);
   });
   $("#resetTimer").addEventListener("click",()=>{stopTimer();timerSeconds=Number($(".presets button.selected")?.dataset.min||25)*60;updateClock();});
@@ -486,9 +524,12 @@
   });
   $("#logPhysiqueWorkout").addEventListener("click",()=>{
     physiqueData.history.unshift({id:makeId(),date:new Date().toISOString(),character:physiqueData.character,type:$("#physiqueWorkoutType").value,effort:$("#physiqueEffort").value});
-    physiqueData.history=physiqueData.history.slice(0,100);savePhysique();renderPhysique();toast("Workout logged. Consistency wins.");
+    physiqueData.history=physiqueData.history.slice(0,100);
+    awardXP(`${todayKey()}|workout|${makeId()}`,30,"Workout logged");
+    savePhysique();renderPhysique();toast("Workout logged. Consistency wins.");
   });
   loadPhysique();
+  renderRPG();
 
   snapshotDay();renderAll();save();
 })();
